@@ -1,0 +1,6 @@
+id,name,surname,birthDate,email,studentYear,groupName,monsterTypeId
+1,Draculaura,Von Bat,2008-10-31,draculaura@monsterhigh.edu,1,1A,1
+2,Clawdeen,Wolf,2007-09-09,clawdeen@monsterhigh.edu,2,2B,2
+3,Frankie,Stein,2009-09-01,frankie@monsterhigh.edu,1,1A,4
+4,Spectra,Vondergeist,2006-04-01,spectra@monsterhigh.edu,2,2A,3
+5,Lagoona,Blue,2007-07-21,lagoona@monsterhigh.edu,2,2B,2

@@ -1,0 +1,5 @@
+id,name,description,weakness,terrorLevel
+1,Vampire,Blood-drinking undead creature of the night,Sunlight,9
+2,Werewolf,Full-moon shapeshifter with enhanced strength,Silver,8
+3,Ghost,Ethereal spirit that haunts the living,Salt,6
+4,Zombie,Reanimated undead with a hunger for brains,Fire,5
