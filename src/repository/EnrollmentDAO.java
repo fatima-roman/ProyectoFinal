@@ -3,30 +3,25 @@ package repository;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
 import model.Enrollment;
 import model.Student;
 import model.Subject;
 import util.DatabaseConnection;
 
 /**
- * DAO for Enrollment persistence using JDBC + SQLite.
- *
+ * Data Access Object for persisting {@link Enrollment} entities using JDBC + SQLite.
+ * Extends {@link GenericRepositoryBD} with the {@link Enrollment} type.
  * @author Fatima
- * @version 1.0
+ * @version 1.1
  */
 public class EnrollmentDAO extends GenericRepositoryBD<Enrollment> {
-
-    /** Used internally to resolve the Student foreign key. */
     private final StudentDAO studentDAO = new StudentDAO();
-
-    /** Used internally to resolve the Subject foreign key. */
     private final SubjectDAO subjectDAO = new SubjectDAO();
 
     /**
-     * Inserts a new Enrollment record into the database.
-     *
-     * @param e the Enrollment to save
+     * Inserts a new enrollment record into the database.
+     * @param e the enrollment to save
+     * @throws RuntimeException if a database error occurs
      */
     @Override
     public void save(Enrollment e) {
@@ -41,14 +36,15 @@ public class EnrollmentDAO extends GenericRepositoryBD<Enrollment> {
             ps.setDouble(5, e.getGrade2());
             ps.executeUpdate();
         } catch (SQLException ex) {
-            System.err.println("[EnrollmentDAO.save] " + ex.getMessage());
+            //F: rethrow so the caller knows the operation failed
+            throw new RuntimeException("[EnrollmentDAO.save] Database error: " + ex.getMessage(), ex);
         }
     }
 
     /**
-     * Updates grade1 and grade2 for an existing Enrollment.
-     *
-     * @param e the Enrollment with updated grades
+     * Updates grade1 and grade2 for an existing enrollment.
+     * @param e the enrollment with updated grades (must carry a valid id)
+     * @throws RuntimeException if a database error occurs
      */
     @Override
     public void update(Enrollment e) {
@@ -60,14 +56,14 @@ public class EnrollmentDAO extends GenericRepositoryBD<Enrollment> {
             ps.setInt(3, e.getId());
             ps.executeUpdate();
         } catch (SQLException ex) {
-            System.err.println("[EnrollmentDAO.update] " + ex.getMessage());
+            throw new RuntimeException("[EnrollmentDAO.update] Database error: " + ex.getMessage(), ex);
         }
     }
 
     /**
-     * Deletes the Enrollment with the given ID.
-     *
-     * @param id the ID of the Enrollment to delete
+     * Deletes the enrollment with the given id.
+     * @param id the id of the enrollment to delete
+     * @throws RuntimeException if a database error occurs
      */
     @Override
     public void deleteById(int id) {
@@ -77,15 +73,15 @@ public class EnrollmentDAO extends GenericRepositoryBD<Enrollment> {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException ex) {
-            System.err.println("[EnrollmentDAO.deleteById] " + ex.getMessage());
+            throw new RuntimeException("[EnrollmentDAO.deleteById] Database error: " + ex.getMessage(), ex);
         }
     }
 
     /**
-     * Retrieves an Enrollment by its ID.
-     *
-     * @param id the ID to search for
-     * @return the found Enrollment, or {@code null} if not present
+     * Retrieves an enrollment by its id.
+     * @param id the id to look up
+     * @return the matching enrollment, or {@code null} if none exists with that id
+     * @throws RuntimeException if a database error occurs
      */
     @Override
     public Enrollment findById(int id) {
@@ -97,15 +93,15 @@ public class EnrollmentDAO extends GenericRepositoryBD<Enrollment> {
                 if (rs.next()) return mapRow(rs);
             }
         } catch (SQLException ex) {
-            System.err.println("[EnrollmentDAO.findById] " + ex.getMessage());
+            throw new RuntimeException("[EnrollmentDAO.findById] Database error: " + ex.getMessage(), ex);
         }
         return null;
     }
 
     /**
-     * Retrieves all Enrollment records from the database.
-     *
-     * @return list of all enrollments
+     * Returns all enrollment records stored in the database.
+     * @return list of all enrollments (empty if none exist)
+     * @throws RuntimeException if a database error occurs
      */
     @Override
     public List<Enrollment> findAll() {
@@ -116,16 +112,16 @@ public class EnrollmentDAO extends GenericRepositoryBD<Enrollment> {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(mapRow(rs));
         } catch (SQLException ex) {
-            System.err.println("[EnrollmentDAO.findAll] " + ex.getMessage());
+            throw new RuntimeException("[EnrollmentDAO.findAll] Database error: " + ex.getMessage(), ex);
         }
         return list;
     }
 
     /**
-     * Retrieves all enrollments for a specific student ID.
-     *
-     * @param studentId the student whose enrollments to fetch
-     * @return list of matching enrollments
+     * Retrieves all enrollments belonging to a specific student.
+     * @param studentId the id of the student whose enrollments to fetch
+     * @return list of matching enrollments (empty if none found)
+     * @throws RuntimeException if a database error occurs
      */
     public List<Enrollment> findByStudentId(int studentId) {
         List<Enrollment> list = new ArrayList<>();
@@ -137,17 +133,41 @@ public class EnrollmentDAO extends GenericRepositoryBD<Enrollment> {
                 while (rs.next()) list.add(mapRow(rs));
             }
         } catch (SQLException ex) {
-            System.err.println("[EnrollmentDAO.findByStudentId] " + ex.getMessage());
+            throw new RuntimeException("[EnrollmentDAO.findByStudentId] Database error: " + ex.getMessage(), ex);
         }
         return list;
     }
 
     /**
-     * Maps a {@link ResultSet} row to an {@link Enrollment} object.
-     * Resolves Student and Subject FKs via their respective DAOs.
-     *
+     * Checks whether a student is already enrolled in a given subject.
+     * Used by {@link service.StudentService} to prevent duplicate enrollments.
+     * This query runs against the database, so it is always accurate regardless
+     * of whether the in-memory Student object has its enrollment list populated.
+     * @param studentId the id of the student to check
+     * @param subjectId the id of the subject to check
+     * @return {@code true} if an enrollment already exists for that student/subject pair
+     * @throws RuntimeException if a database error occurs
+     */
+    public boolean existsByStudentAndSubject(int studentId, int subjectId) {
+        String sql = "SELECT COUNT(*) FROM ENROLLMENT WHERE studentId=? AND subjectId=?";
+        try (Connection c = DatabaseConnection.getInstance().getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, studentId);
+            ps.setInt(2, subjectId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        } catch (SQLException ex) {
+            throw new RuntimeException("[EnrollmentDAO.existsByStudentAndSubject] Database error: " + ex.getMessage(), ex);
+        }
+        return false;
+    }
+
+    /**
+     * Maps the current row of a {@link ResultSet} into an {@link Enrollment} object.
+     * Resolves the Student and Subject foreign keys via their respective DAOs.
      * @param rs the current ResultSet row
-     * @return populated Enrollment instance
+     * @return the Enrollment built from that row
      * @throws SQLException if any column cannot be read
      */
     private Enrollment mapRow(ResultSet rs) throws SQLException {

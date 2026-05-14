@@ -4,26 +4,47 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-
 import model.MonsterType;
 import model.Student;
 import util.DatabaseConnection;
 
 /**
- * DAO for Student persistence using JDBC + SQLite.
+ * Data Access Object for persisting {@link Student} entities using JDBC + SQLite.
+ * Extends {@link GenericRepositoryBD} with the {@link Student} type.
  *
  * @author Fatima
- * @version 1.0
+ * @version 1.1
  */
 public class StudentDAO extends GenericRepositoryBD<Student> {
 
-    /** Used internally to resolve the MonsterType foreign key. */
-    private final MonsterTypeDAO monsterTypeDAO = new MonsterTypeDAO();
+    /**
+     * Used internally to resolve the MonsterType foreign key.
+     * Accepted via constructor to allow mock injection in unit tests.
+     */
+    private final MonsterTypeDAO monsterTypeDAO;
 
     /**
-     * Inserts a new Student record into the database.
+     * Default constructor. Creates its own {@link MonsterTypeDAO} instance.
+     */
+    public StudentDAO() {
+        this.monsterTypeDAO = new MonsterTypeDAO();
+    }
+
+    /**
+     * Dependency-injection constructor.
+     * Useful for unit tests where a mock {@link MonsterTypeDAO} is needed.
      *
-     * @param s the Student to save
+     * @param monsterTypeDAO the MonsterTypeDAO instance to use
+     */
+    public StudentDAO(MonsterTypeDAO monsterTypeDAO) {
+        this.monsterTypeDAO = monsterTypeDAO;
+    }
+
+    /**
+     * Inserts a new student record into the database.
+     *
+     * @param s the student to save
+     * @throws RuntimeException if a database error occurs
      */
     @Override
     public void save(Student s) {
@@ -34,6 +55,7 @@ public class StudentDAO extends GenericRepositoryBD<Student> {
             ps.setInt(1, s.getId());
             ps.setString(2, s.getName());
             ps.setString(3, s.getSurname());
+            // FIX: store null when birthDate is absent instead of LocalDate.now()
             ps.setString(4, s.getBirthDate() != null ? s.getBirthDate().toString() : null);
             ps.setString(5, s.getEmail());
             ps.setInt(6, s.getStudentYear());
@@ -42,14 +64,16 @@ public class StudentDAO extends GenericRepositoryBD<Student> {
             else ps.setNull(8, Types.INTEGER);
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("[StudentDAO.save] " + e.getMessage());
+            // FIX: rethrow so the caller knows the operation failed
+            throw new RuntimeException("[StudentDAO.save] Database error: " + e.getMessage(), e);
         }
     }
 
     /**
-     * Updates an existing Student record in the database.
+     * Updates an existing student record in the database.
      *
-     * @param s the Student with updated data
+     * @param s the student with updated values (must carry a valid id)
+     * @throws RuntimeException if a database error occurs
      */
     @Override
     public void update(Student s) {
@@ -68,14 +92,15 @@ public class StudentDAO extends GenericRepositoryBD<Student> {
             ps.setInt(8, s.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("[StudentDAO.update] " + e.getMessage());
+            throw new RuntimeException("[StudentDAO.update] Database error: " + e.getMessage(), e);
         }
     }
 
     /**
-     * Deletes the Student with the given ID.
+     * Deletes the student with the given id from the database.
      *
-     * @param id the ID of the Student to delete
+     * @param id the identifier of the student to remove
+     * @throws RuntimeException if a database error occurs
      */
     @Override
     public void deleteById(int id) {
@@ -85,15 +110,16 @@ public class StudentDAO extends GenericRepositoryBD<Student> {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("[StudentDAO.deleteById] " + e.getMessage());
+            throw new RuntimeException("[StudentDAO.deleteById] Database error: " + e.getMessage(), e);
         }
     }
 
     /**
-     * Retrieves a Student by its ID.
+     * Retrieves a student by its id.
      *
-     * @param id the ID to search for
-     * @return the found Student, or {@code null} if not present
+     * @param id the identifier to look up
+     * @return the matching student, or {@code null} if none exists with that id
+     * @throws RuntimeException if a database error occurs
      */
     @Override
     public Student findById(int id) {
@@ -105,15 +131,16 @@ public class StudentDAO extends GenericRepositoryBD<Student> {
                 if (rs.next()) return mapRow(rs);
             }
         } catch (SQLException e) {
-            System.err.println("[StudentDAO.findById] " + e.getMessage());
+            throw new RuntimeException("[StudentDAO.findById] Database error: " + e.getMessage(), e);
         }
         return null;
     }
 
     /**
-     * Retrieves all Student records from the database.
+     * Returns all students stored in the database.
      *
-     * @return list of all students
+     * @return list of students (empty if none exist)
+     * @throws RuntimeException if a database error occurs
      */
     @Override
     public List<Student> findAll() {
@@ -124,17 +151,17 @@ public class StudentDAO extends GenericRepositoryBD<Student> {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(mapRow(rs));
         } catch (SQLException e) {
-            System.err.println("[StudentDAO.findAll] " + e.getMessage());
+            throw new RuntimeException("[StudentDAO.findAll] Database error: " + e.getMessage(), e);
         }
         return list;
     }
 
     /**
-     * Maps a {@link ResultSet} row to a {@link Student} object.
-     * Resolves the MonsterType FK via {@link MonsterTypeDAO}.
+     * Maps the current row of a {@link ResultSet} into a {@link Student} object.
+     * Resolves the MonsterType foreign key via {@link MonsterTypeDAO}.
      *
      * @param rs the current ResultSet row
-     * @return populated Student instance
+     * @return the Student built from that row
      * @throws SQLException if any column cannot be read
      */
     private Student mapRow(ResultSet rs) throws SQLException {
@@ -145,7 +172,8 @@ public class StudentDAO extends GenericRepositoryBD<Student> {
             rs.getInt("id"),
             rs.getString("name"),
             rs.getString("surname"),
-            bd != null ? LocalDate.parse(bd) : LocalDate.now(),
+            // FIX: return null when birthDate is absent in the DB instead of LocalDate.now()
+            bd != null ? LocalDate.parse(bd) : null,
             rs.getString("email"),
             rs.getInt("studentYear"),
             rs.getString("groupName"),
