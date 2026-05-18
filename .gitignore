@@ -1,1 +1,3 @@
 /bin/
+# SQLite database — automatically regenerated on startup
+*.db
