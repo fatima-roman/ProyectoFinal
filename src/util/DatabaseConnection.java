@@ -11,9 +11,25 @@ import java.sql.SQLException;
  */
 public class DatabaseConnection {
 
-	//FIX with help (claude) 
-	static String dbPath = System.getProperty("user.dir") + "/src/resources/monsterhigh.db";
-	private static final String DB_URL = "jdbc:sqlite:" + dbPath;
+	private static final String DB_URL;
+
+	static {
+	    try {
+	        java.net.URL resource = DatabaseConnection.class
+	            .getClassLoader()
+	            .getResource("resources/monsterhigh.db");
+
+	        if (resource == null) {
+	            throw new RuntimeException("[DB] No se encontró monsterhigh.db en resources/");
+	        }
+
+	        String path = resource.toURI().getPath();
+	        DB_URL = "jdbc:sqlite:" + path;
+
+	    } catch (java.net.URISyntaxException e) {
+	        throw new RuntimeException("[DB] Error al construir la ruta: " + e.getMessage());
+	    }
+	}
 	private static DatabaseConnection instance;
     private Connection connection;
 
