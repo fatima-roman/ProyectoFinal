@@ -25,19 +25,37 @@ public class TeacherService {
         return t;
     }
 
+    /**
+     * Persists a new teacher in the database.
+     *
+     * Validates that name, surname, specialty and email are not blank
+     * before delegating to the DAO.
+     *
+     * @param teacher the teacher to create; must not be {@code null}
+     * @throws IllegalArgumentException if any required field is blank
+     */
     public void save(Teacher teacher) {
         validateTeacher(teacher);
         teacherDAO.save(teacher);
     }
-
+    
+    /**
+     * Updates an existing teacher record in the database.
+     *
+     * Confirms the teacher exists first, then validates and persists changes.
+     *
+     * @param teacher the teacher with updated values; must not be {@code null}
+     * @throws StudentNotFoundException if no teacher exists with that ID
+     * @throws IllegalArgumentException if any required field is blank
+     */
     public void update(Teacher teacher) throws StudentNotFoundException {
-        findById(teacher.getId());   // confirms it exists
+        findById(teacher.getId());  
         validateTeacher(teacher);
         teacherDAO.update(teacher);
     }
 
     public void deleteById(int id) throws StudentNotFoundException {
-        findById(id);                // confirms it exists
+        findById(id);                
         teacherDAO.deleteById(id);
     }
 
@@ -104,4 +122,7 @@ public class TeacherService {
         if (t.getEmail()     == null || t.getEmail().isBlank())
             throw new IllegalArgumentException("Teacher email cannot be blank.");
     }
+    
+    
+    
 }

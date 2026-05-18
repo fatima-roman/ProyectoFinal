@@ -40,9 +40,18 @@ public class Student extends Person implements Exportable, Evaluable {
     //Getters & setters
 
     public int getStudentYear() { return studentYear; }
-    public void setStudentYear(int y) { this.studentYear = y; }
+    public void setStudentYear(int y) {
+        if (y < 1 || y > 2)
+            throw new IllegalArgumentException("Student year must be 1 or 2, got: " + y);
+        this.studentYear = y;
+    }
+
+    public void setGroupName(String g) {
+        if (g == null || g.isBlank())
+            throw new IllegalArgumentException("Group name cannot be blank.");
+        this.groupName = g;
+    }    
     public String getGroupName() { return groupName; }
-    public void setGroupName(String g) { this.groupName = g; }
     public MonsterType getMonsterType() { return monsterType; }
     public void setMonsterType(MonsterType m) { this.monsterType = m; }
     public List<Enrollment> getEnrollments() { return enrollments; }
@@ -127,11 +136,18 @@ public class Student extends Person implements Exportable, Evaluable {
         return s;
     }
 
+
     @Override
     public String toString() {
-        return "Student[id=" + id + ", name=" + name + " " + surname +
-               ", year=" + studentYear + ", group=" + groupName +
-               ", type=" + (monsterType != null ? monsterType.getName() : "none") + "]";
+        return  "\n" +
+                " ID:         " + id + "\n" +
+                " Name:       " + name + " " + surname + "\n" +
+                " Birth date: " + (birthDate != null ? birthDate : "N/A") + "\n" +
+                " Email:      " + email + "\n" +
+                " Year/Group: " + studentYear + " / " + groupName + "\n" +
+                " Type:       " + (monsterType != null ? monsterType.getName() : "Unknown") + "\n" +
+                " Avg grade:  " + String.format("%.2f", calculateFinalGrade()) + "\n" +
+                "─────────────────────────────────────";
     }
 
     /**

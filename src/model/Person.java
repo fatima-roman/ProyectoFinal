@@ -37,8 +37,11 @@ public abstract class Person implements Identifiable {
     public LocalDate getBirthDate()       { return birthDate; }
     public void setBirthDate(LocalDate d) { this.birthDate = d; }
     public String getEmail()              { return email; }
-    public void setEmail(String email)    { this.email = email; }
-
+    public void setEmail(String email) {
+        if (email == null || !email.contains("@"))
+            throw new IllegalArgumentException("Invalid email format: " + email);
+        this.email = email;
+    }
     @Override
     public String toString() {
         return getClass().getSimpleName() +
