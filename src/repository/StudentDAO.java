@@ -122,9 +122,9 @@ public class StudentDAO extends GenericRepositoryBD<Student> {
     /**
      * Retrieves a single {@link Student} by its primary key.
      *
-     * <p>The {@link MonsterType} foreign key is resolved in a separate query
-     * <em>after</em> the main ResultSet is fully closed, preventing
-     * concurrent-statement errors in SQLite.</p>
+     * The {@link MonsterType} foreign key is resolved in a separate query
+     * after the main ResultSet is fully closed, preventing
+     * concurrent-statement errors in SQLite.
      *
      * @param id the student ID to look up
      * @return the matching {@link Student}, or {@code null} if not found
