@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -45,10 +46,17 @@ public class DatabaseConnection {
 
     private static DatabaseConnection instance;
     private Connection connection;
+    private static boolean schemaInitialized = false;
 
     private DatabaseConnection() throws SQLException {
         this.connection = DriverManager.getConnection(DB_URL);
-        initializeSchema();
+
+        // Solo inicializa el schema la primera vez en toda la ejecución
+        if (!schemaInitialized) {
+            initializeSchema();
+            initializeData();
+            schemaInitialized = true;
+        }
     }
 
     /**
@@ -125,11 +133,12 @@ public class DatabaseConnection {
      */
     private void initializeData() {
         try {
-            // Comprueba si ya hay datos para no duplicar
-            var rs = connection.createStatement().executeQuery("SELECT COUNT(*) FROM STUDENT");
-            if (rs.getInt(1) > 0) {
-                System.out.println("[DB] Datos ya existentes, no se insertan de nuevo.");
-                return;
+            try (Statement checkStmt = connection.createStatement();
+                 ResultSet rs = checkStmt.executeQuery("SELECT COUNT(*) FROM STUDENT")) {
+                if (rs.getInt(1) > 0) {
+                    System.out.println("[DB] Datos ya existentes, no se insertan de nuevo.");
+                    return;
+                }
             }
 
             URL dataUrl = DatabaseConnection.class
@@ -138,7 +147,7 @@ public class DatabaseConnection {
 
             if (dataUrl == null) {
                 String projectDir = System.getProperty("user.dir");
-                Path dataPath = java.nio.file.Paths.get(projectDir, "src", "resources", "data.sql");
+                Path dataPath = Paths.get(projectDir, "src", "resources", "data.sql");
                 dataUrl = dataPath.toUri().toURL();
             }
 
