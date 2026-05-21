@@ -2,8 +2,8 @@ package ui;
 
 import exceptions.StudentNotFoundException;
 import model.MonsterType;
-import model.Student;
-import service.StudentService;
+import model.Teacher;
+import service.TeacherService;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -11,15 +11,15 @@ import java.util.Scanner;
 
 /**
  * Application entry point and main console menu for Monster High Institute.
- * Provides full CRUD operations on {@link Student} entities via {@link StudentService}.
+ * Provides full CRUD operations on {@link Teacher} entities via {@link TeacherService}.
  *
  * @author Fatima Roman
- * @version 2.0
+ * @version 1.0
  */
-public class MainMenu {
+public class MainMenuTeachers {
 
     private static final Scanner sc = new Scanner(System.in);
-    private static final StudentService studentService = new StudentService();
+    private static final TeacherService teacherService = new TeacherService();
 
     /**
      * Launches the main menu loop.
@@ -32,7 +32,7 @@ public class MainMenu {
             printMenu();
             option = readInt();
             switch (option) {
-                case 1 -> listAllStudents();
+                case 1 -> listAllTeacher();
                 case 2 -> findStudentById();
                 case 3 -> addStudent();
                 case 4 -> updateStudent();
@@ -62,14 +62,14 @@ public class MainMenu {
     /**
      * Retrieves and prints all students registered in the system.
      */
-    private static void listAllStudents() {
-        List<Student> students = studentService.findAll();
-        if (students.isEmpty()) {
+    private static void listAllTeacher() {
+        List<Teacher> teachers = teacherService.findAll();
+        if (teachers.isEmpty()) {
             System.out.println("No students registered.");
             return;
         }
-        System.out.println("\n--- Student List (" + students.size() + " total) ---");
-        students.forEach(System.out::println);
+        System.out.println("\n--- Student List (" + teachers.size() + " total) ---");
+        teachers.forEach(System.out::println);
     }
 
     /**
@@ -79,7 +79,7 @@ public class MainMenu {
         System.out.print("Enter student ID: ");
         int id = readInt();
         try {
-            Student s = studentService.findById(id);
+            Teacher s = teacherService.findById(id);
             System.out.println("\n" + s);
         } catch (StudentNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
@@ -90,7 +90,7 @@ public class MainMenu {
      * Prompts the user for all student fields and saves a new student.
      */
     private static void addStudent() {
-        System.out.println("\n--- Add New Student ---");
+        System.out.println("\n--- Add New Teacher ---");
 
         System.out.print("ID: ");
         int id = readInt();
@@ -106,22 +106,14 @@ public class MainMenu {
 
         System.out.print("Email: ");
         String email = sc.nextLine().trim();
+        
+        System.out.print("Speciallity: ");
+        String Spec = sc.nextLine().trim();
 
-        System.out.print("Year (1 or 2): ");
-        int year = readInt();
-
-        System.out.print("Group name (e.g. 1A): ");
-        String groupName = sc.nextLine().trim();
-
-        System.out.print("Monster Type ID (1=Vampire, 2=Werewolf, 3=Zombie, 4=Witch, 5=Mummy): ");
-        int mtId = readInt();
-
-        MonsterType mt = new MonsterType(mtId, null, null, null, 0);
-
-        Student newStudent = new Student(id, name, surname, birthDate, email, year, groupName, mt);
+        Teacher newStudent = new Teacher(id, name, surname, birthDate, email, Spec);
 
         try {
-            studentService.save(newStudent);
+            teacherService.save(newStudent);
             System.out.println("✅ Student added successfully!");
         } catch (Exception e) {
             System.out.println("Error adding student: " + e.getMessage());
@@ -136,9 +128,9 @@ public class MainMenu {
         System.out.print("\nEnter the ID of the student to update: ");
         int id = readInt();
 
-        Student existing;
+        Teacher existing;
         try {
-            existing = studentService.findById(id);
+            existing = teacherService.findById(id);
         } catch (StudentNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
             return;
@@ -176,7 +168,7 @@ public class MainMenu {
         Student updated = new Student(id, name, surname, birthDate, email, year, groupName, mt);
 
         try {
-            studentService.update(updated);
+            teacherService.update(updated);
             System.out.println("✅ Student updated successfully!");
         } catch (Exception e) {
             System.out.println("Error updating student: " + e.getMessage());
@@ -191,14 +183,14 @@ public class MainMenu {
         int id = readInt();
 
         try {
-            Student s = studentService.findById(id);
+            Student s = teacherService.findById(id);
             System.out.println("Are you sure you want to delete: " + s + " ? (y/n): ");
             String confirm = sc.nextLine().trim();
             if (!confirm.equalsIgnoreCase("y")) {
                 System.out.println("Deletion cancelled.");
                 return;
             }
-            studentService.deleteStudent(id);
+            teacherService.deleteStudent(id);
             System.out.println("✅ Student deleted successfully.");
         } catch (StudentNotFoundException e) {
             System.out.println("Error: " + e.getMessage());
