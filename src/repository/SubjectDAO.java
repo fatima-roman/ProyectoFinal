@@ -1,6 +1,7 @@
 package repository;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,12 +13,9 @@ import util.DatabaseConnection;
  * DAO for Subject persistence using JDBC + SQLite.
  *
  * @author Fatima
- * @version 1.0
+ * @version 1.1
  */
 public class SubjectDAO extends GenericRepositoryBD<Subject> {
-
-    /** Used internally to resolve the Teacher foreign key. */
-    private final TeacherDAO teacherDAO = new TeacherDAO();
 
     /**
      * Inserts a new Subject record into the database.
@@ -29,11 +27,17 @@ public class SubjectDAO extends GenericRepositoryBD<Subject> {
         String sql = "INSERT INTO SUBJECT(id, name, course, teacherId) VALUES(?, ?, ?, ?)";
         try (Connection c = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setInt(1, s.getId());
             ps.setString(2, s.getName());
             ps.setInt(3, s.getCourse());
-            if (s.getTeacher() != null) ps.setInt(4, s.getTeacher().getId());
-            else ps.setNull(4, Types.INTEGER);
+
+            if (s.getTeacher() != null) {
+                ps.setInt(4, s.getTeacher().getId());
+            } else {
+                ps.setNull(4, Types.INTEGER);
+            }
+
             ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("[SubjectDAO.save] " + e.getMessage());
@@ -41,7 +45,7 @@ public class SubjectDAO extends GenericRepositoryBD<Subject> {
     }
 
     /**
-     * Updates an existing Subject record in the database.
+     * Updates an existing Subject record.
      *
      * @param s the Subject with updated data
      */
@@ -50,10 +54,16 @@ public class SubjectDAO extends GenericRepositoryBD<Subject> {
         String sql = "UPDATE SUBJECT SET name=?, course=?, teacherId=? WHERE id=?";
         try (Connection c = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setString(1, s.getName());
             ps.setInt(2, s.getCourse());
-            if (s.getTeacher() != null) ps.setInt(3, s.getTeacher().getId());
-            else ps.setNull(3, Types.INTEGER);
+
+            if (s.getTeacher() != null) {
+                ps.setInt(3, s.getTeacher().getId());
+            } else {
+                ps.setNull(3, Types.INTEGER);
+            }
+
             ps.setInt(4, s.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -64,13 +74,14 @@ public class SubjectDAO extends GenericRepositoryBD<Subject> {
     /**
      * Deletes the Subject with the given ID.
      *
-     * @param id the ID of the Subject to delete
+     * @param id the Subject ID
      */
     @Override
     public void deleteById(int id) {
         String sql = "DELETE FROM SUBJECT WHERE id=?";
         try (Connection c = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -79,23 +90,40 @@ public class SubjectDAO extends GenericRepositoryBD<Subject> {
     }
 
     /**
-     * Retrieves a Subject by its ID.
+     * Finds a Subject by ID.
      *
-     * @param id the ID to search for
-     * @return the found Subject, or {@code null} if not present
+     * @param id the Subject ID
+     * @return the subject found or null
      */
     @Override
     public Subject findById(int id) {
-        String sql = "SELECT * FROM SUBJECT WHERE id=?";
+        String sql = """
+                SELECT s.id, s.name, s.course,
+                       t.id AS teacher_id,
+                       t.name AS teacher_name,
+                       t.surname AS teacher_surname,
+                       t.birthDate AS teacher_birthDate,
+                       t.email AS teacher_email,
+                       t.specialty AS teacher_specialty
+                FROM SUBJECT s
+                LEFT JOIN TEACHER t ON s.teacherId = t.id
+                WHERE s.id = ?
+                """;
+
         try (Connection c = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
+
             ps.setInt(1, id);
+
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return mapRow(rs);
+                if (rs.next()) {
+                    return mapRowWithTeacher(rs);
+                }
             }
         } catch (SQLException e) {
             System.err.println("[SubjectDAO.findById] " + e.getMessage());
         }
+
         return null;
     }
 
@@ -107,28 +135,67 @@ public class SubjectDAO extends GenericRepositoryBD<Subject> {
     @Override
     public List<Subject> findAll() {
         List<Subject> list = new ArrayList<>();
-        String sql = "SELECT * FROM SUBJECT";
+
+        String sql = """
+                SELECT s.id, s.name, s.course,
+                       t.id AS teacher_id,
+                       t.name AS teacher_name,
+                       t.surname AS teacher_surname,
+                       t.birthDate AS teacher_birthDate,
+                       t.email AS teacher_email,
+                       t.specialty AS teacher_specialty
+                FROM SUBJECT s
+                LEFT JOIN TEACHER t ON s.teacherId = t.id
+                ORDER BY s.id
+                """;
+
         try (Connection c = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(mapRow(rs));
+
+            while (rs.next()) {
+                list.add(mapRowWithTeacher(rs));
+            }
         } catch (SQLException e) {
             System.err.println("[SubjectDAO.findAll] " + e.getMessage());
         }
+
         return list;
     }
 
     /**
-     * Maps a {@link ResultSet} row to a {@link Subject} object.
-     * Resolves the Teacher FK via {@link TeacherDAO}.
+     * Maps a ResultSet row to a Subject object with teacher data.
      *
-     * @param rs the current ResultSet row
-     * @return populated Subject instance
-     * @throws SQLException if any column cannot be read
+     * @param rs current row
+     * @return mapped Subject
+     * @throws SQLException if any DB access error occurs
      */
-    private Subject mapRow(ResultSet rs) throws SQLException {
-        int teacherId = rs.getInt("teacherId");
-        Teacher teacher = rs.wasNull() ? null : teacherDAO.findById(teacherId);
+    private Subject mapRowWithTeacher(ResultSet rs) throws SQLException {
+        Teacher teacher = null;
+
+        int teacherId = rs.getInt("teacher_id");
+        if (!rs.wasNull()) {
+        	String rawDate = rs.getString("teacher_birthDate");
+        	LocalDate birthDate = null;
+
+        	if (rawDate != null && !rawDate.isBlank()) {
+        	    try {
+        	        birthDate = LocalDate.parse(rawDate);
+        	    } catch (Exception e) {
+        	        System.err.println("[SubjectDAO.mapRowWithTeacher] Invalid birthDate format: " + rawDate);
+        	    }
+        	}
+
+            teacher = new Teacher(
+                teacherId,
+                rs.getString("teacher_name"),
+                rs.getString("teacher_surname"),
+                birthDate,
+                rs.getString("teacher_email"),
+                rs.getString("teacher_specialty")
+            );
+        }
+
         return new Subject(
             rs.getInt("id"),
             rs.getString("name"),

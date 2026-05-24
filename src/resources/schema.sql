@@ -4,7 +4,7 @@
 -- ============================================================
 
 CREATE TABLE IF NOT EXISTS MONSTER_TYPE (
-    id          INTEGER PRIMARY KEY,
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
     name        TEXT    NOT NULL UNIQUE,
     description TEXT,
     weakness    TEXT,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS MONSTER_TYPE (
 );
 
 CREATE TABLE IF NOT EXISTS TEACHER (
-    id        INTEGER PRIMARY KEY,
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
     name      TEXT    NOT NULL,
     surname   TEXT    NOT NULL,
     birthDate TEXT,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS TEACHER (
 );
 
 CREATE TABLE IF NOT EXISTS STUDENT (
-    id            INTEGER PRIMARY KEY,
+    id            INTEGER PRIMARY KEY AUTOINCREMENT,
     name          TEXT    NOT NULL,
     surname       TEXT    NOT NULL,
     birthDate     TEXT,
@@ -32,14 +32,14 @@ CREATE TABLE IF NOT EXISTS STUDENT (
 );
 
 CREATE TABLE IF NOT EXISTS SUBJECT (
-    id        INTEGER PRIMARY KEY,
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
     name      TEXT    NOT NULL,
     course    INTEGER NOT NULL CHECK(course IN (1,2)),
     teacherId INTEGER REFERENCES TEACHER(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS MONSTER_GROUP (
-    id      INTEGER PRIMARY KEY,
+    id      INTEGER PRIMARY KEY AUTOINCREMENT,
     name    TEXT    NOT NULL UNIQUE,
     tutorId INTEGER REFERENCES TEACHER(id) ON DELETE SET NULL
 );
