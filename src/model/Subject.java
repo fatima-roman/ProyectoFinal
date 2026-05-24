@@ -16,11 +16,11 @@ public class Subject implements Identifiable, Exportable {
     private int course;
     private Teacher teacher;
 
-    public Subject(int id, String name, int course, Teacher teacher) {
+    public Subject(int id, String name, int course, Teacher teacherId) {
         this.id      = id;
         this.name    = name;
         this.course  = course;
-        this.teacher = teacher;
+        this.teacher = teacherId;
     }
 
     @Override public int getId()            { return id; }
