@@ -9,20 +9,28 @@ import model.Subject;
 import repository.EnrollmentDAO;
 import repository.StudentDAO;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Business service for student management.
- *
- * Acts as the middle layer between the UI and the DAO,
+ * Acts as the middle layer between the UI and {@link StudentDAO},
  * enforcing business rules before any database access.
  *
  * @author Fatima Roman
- * @version 2.0
+ * @version 2.1
  */
 public class StudentService {
+
+    /** DAO used to interact with the STUDENT table. */
     private final StudentDAO studentDAO = new StudentDAO();
+
+    /** DAO used to interact with the ENROLLMENT table. */
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
+
+    // ── CRUD ──────────────────────────────────────────────────────────────
 
     /**
      * Finds a student by its primary key.
@@ -40,7 +48,7 @@ public class StudentService {
     /**
      * Returns all registered students.
      *
-     * @return list of all students (may be empty, never null)
+     * @return list of all students (may be empty, never {@code null})
      */
     public List<Student> findAll() {
         return studentDAO.findAll();
@@ -49,30 +57,23 @@ public class StudentService {
     /**
      * Saves a new student to the database.
      *
-     * Validates that no student with the same ID already exists
-     * before persisting.
-     *
      * @param student the student to create; must not be {@code null}
      * @throws IllegalArgumentException if a student with the same ID already exists
      */
     public void save(Student student) {
-        if (studentDAO.findById(student.getId()) != null) {
-            throw new IllegalArgumentException(
-                "A student with ID " + student.getId() + " already exists.");
-        }
+        if (studentDAO.findById(student.getId()) != null)
+            throw new IllegalArgumentException("A student with ID " + student.getId() + " already exists.");
         studentDAO.save(student);
     }
 
     /**
-     * Updates an existing student record in the database.
-     *
-     * Validates that the student actually exists before updating.
+     * Updates an existing student record.
      *
      * @param student the student with updated values; must not be {@code null}
      * @throws StudentNotFoundException if no student exists with that id
      */
     public void update(Student student) throws StudentNotFoundException {
-        findById(student.getId()); // throws StudentNotFoundException if not found
+        findById(student.getId());
         studentDAO.update(student);
     }
 
@@ -83,42 +84,101 @@ public class StudentService {
      * @throws StudentNotFoundException if no student exists with that id
      */
     public void deleteStudent(int id) throws StudentNotFoundException {
-        findById(id); // throws if not found
+        findById(id);
         studentDAO.deleteById(id);
     }
+
+    // ── Enrollment ────────────────────────────────────────────────────────
 
     /**
      * Enrolls a student in a subject with two partial grades.
      *
-     * Business rules enforced:
-     * <ul>
-     *   <li>Student must exist.</li>
-     *   <li>Both grades must be within [0, 10].</li>
-     *   <li>Student must not already be enrolled in the subject.</li>
-     * </ul>
-     *
      * @param studentId the student's id
      * @param subject   the subject to enroll in
-     * @param g1        first partial grade (0–10)
-     * @param g2        second partial grade (0–10)
-     * @throws StudentNotFoundException      if the student does not exist
-     * @throws GradeOutOfRangeException      if any grade is outside [0, 10]
-     * @throws DuplicateEnrollmentException  if the student is already enrolled
+     * @param g1        first partial grade (0-10)
+     * @param g2        second partial grade (0-10)
+     * @throws StudentNotFoundException     if the student does not exist
+     * @throws GradeOutOfRangeException     if any grade is outside [0, 10]
+     * @throws DuplicateEnrollmentException if the student is already enrolled
      */
     public void enrollStudent(int studentId, Subject subject, double g1, double g2)
             throws StudentNotFoundException, DuplicateEnrollmentException, GradeOutOfRangeException {
-
         Student student = findById(studentId);
-
         if (g1 < 0 || g1 > 10) throw new GradeOutOfRangeException(g1);
         if (g2 < 0 || g2 > 10) throw new GradeOutOfRangeException(g2);
-
-        boolean alreadyEnrolled = enrollmentDAO.existsByStudentAndSubject(studentId, subject.getId());
-        if (alreadyEnrolled)
+        if (enrollmentDAO.existsByStudentAndSubject(studentId, subject.getId()))
             throw new DuplicateEnrollmentException(student.getName(), subject.getName());
-
         Enrollment enrollment = new Enrollment(0, student, subject, g1, g2);
         enrollmentDAO.save(enrollment);
         student.enrollSubject(enrollment);
+    }
+
+    // ── Stream operations ─────────────────────────────────────────────────
+
+    /**
+     * Returns all students sorted by surname.
+     *
+     * @return sorted list of students
+     */
+    public List<Student> findAllSortedBySurname() {
+        return studentDAO.findAll().stream()
+                .sorted(Comparator.comparing(Student::getSurname))
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Filters students by their year.
+     *
+     * @param year the year to filter by (1 or 2)
+     * @return list of students in that year
+     */
+    public List<Student> findByYear(int year) {
+        return studentDAO.findAll().stream()
+                .filter(s -> s.getStudentYear() == year)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Returns the names of all students.
+     *
+     * @return list of "Name Surname" strings
+     */
+    public List<String> getAllStudentNames() {
+        return studentDAO.findAll().stream()
+                .map(s -> s.getName() + " " + s.getSurname())
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Groups students by their year.
+     *
+     * @return map from year to list of students
+     */
+    public Map<Integer, List<Student>> groupByYear() {
+        return studentDAO.findAll().stream()
+                .collect(Collectors.groupingBy(Student::getStudentYear));
+    }
+
+    /**
+     * Returns the number of students who have passed (average grade >= 5).
+     *
+     * @return count of students who have passed
+     */
+    public long countPassed() {
+        return studentDAO.findAll().stream()
+                .filter(Student::hasPassed)
+                .count();
+    }
+
+    /**
+     * Returns the average final grade across all students.
+     *
+     * @return average grade, or 0.0 if no students exist
+     */
+    public double averageGrade() {
+        return studentDAO.findAll().stream()
+                .mapToDouble(Student::calculateFinalGrade)
+                .average()
+                .orElse(0.0);
     }
 }

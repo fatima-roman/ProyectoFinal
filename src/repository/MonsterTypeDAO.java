@@ -1,51 +1,57 @@
 package repository;
 
+import exceptions.DatabaseException;
+import model.MonsterType;
+import util.DatabaseConnection;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import model.MonsterType;
-import util.DatabaseConnection;
-
 /**
- * DAO for MonsterType persistence using JDBC + SQLite.
+ * DAO for {@link MonsterType} persistence using JDBC + SQLite.
+ * Extends {@link GenericRepositoryBD} to fulfil the generic repository requirement.
+ * All primary keys are managed by the database via AUTOINCREMENT.
  *
- * @author Fatima R
- * @version 1.0
+ * @author Fatima Roman
+ * @version 1.1
  */
 public class MonsterTypeDAO extends GenericRepositoryBD<MonsterType> {
 
     /**
-     * Inserts a new MonsterType record into the database.
+     * Inserts a new {@link MonsterType} into the database.
+     * The {@code id} field is ignored; the database assigns it automatically.
      *
-     * @param mt the MonsterType to save
+     * @param mt the monster type to persist; must not be {@code null}
+     * @throws DatabaseException if a SQL error occurs
      */
     @Override
     public void save(MonsterType mt) {
-        String sql = "INSERT INTO MONSTER_TYPE(id, name, description, weakness, terrorLevel) " +
-                     "VALUES(?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO MONSTER_TYPE(name, description, weakness, terrorLevel) VALUES(?,?,?,?)";
         try (Connection c = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, mt.getId());
-            ps.setString(2, mt.getName());
-            ps.setString(3, mt.getDescription());
-            ps.setString(4, mt.getWeakness());
-            ps.setInt(5, mt.getTerrorLevel());
+             PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            ps.setString(1, mt.getName());
+            ps.setString(2, mt.getDescription());
+            ps.setString(3, mt.getWeakness());
+            ps.setInt(4, mt.getTerrorLevel());
             ps.executeUpdate();
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) mt.setId(keys.getInt(1));
+            }
         } catch (SQLException e) {
-            System.err.println("[MonsterTypeDAO.save] " + e.getMessage());
+            throw new DatabaseException("[MonsterTypeDAO.save] " + e.getMessage(), e);
         }
     }
 
     /**
-     * Updates an existing MonsterType record in the database.
+     * Updates an existing {@link MonsterType} record in the database.
      *
-     * @param mt the MonsterType with updated data
+     * @param mt the monster type with updated values; must not be {@code null}
+     * @throws DatabaseException if a SQL error occurs
      */
     @Override
     public void update(MonsterType mt) {
-        String sql = "UPDATE MONSTER_TYPE SET name=?, description=?, weakness=?, terrorLevel=? " +
-                     "WHERE id=?";
+        String sql = "UPDATE MONSTER_TYPE SET name=?, description=?, weakness=?, terrorLevel=? WHERE id=?";
         try (Connection c = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, mt.getName());
@@ -55,14 +61,15 @@ public class MonsterTypeDAO extends GenericRepositoryBD<MonsterType> {
             ps.setInt(5, mt.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("[MonsterTypeDAO.update] " + e.getMessage());
+            throw new DatabaseException("[MonsterTypeDAO.update] " + e.getMessage(), e);
         }
     }
 
     /**
-     * Deletes the MonsterType with the given ID.
+     * Deletes the {@link MonsterType} with the given ID from the database.
      *
-     * @param id the ID of the MonsterType to delete
+     * @param id the identifier of the monster type to delete
+     * @throws DatabaseException if a SQL error occurs
      */
     @Override
     public void deleteById(int id) {
@@ -72,15 +79,16 @@ public class MonsterTypeDAO extends GenericRepositoryBD<MonsterType> {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("[MonsterTypeDAO.deleteById] " + e.getMessage());
+            throw new DatabaseException("[MonsterTypeDAO.deleteById] " + e.getMessage(), e);
         }
     }
 
     /**
-     * Retrieves a MonsterType by its ID.
+     * Finds a {@link MonsterType} by its primary key.
      *
-     * @param id the ID to search for
-     * @return the found MonsterType, or {@code null} if not present
+     * @param id the identifier to look up
+     * @return the matching monster type, or {@code null} if not found
+     * @throws DatabaseException if a SQL error occurs
      */
     @Override
     public MonsterType findById(int id) {
@@ -92,15 +100,16 @@ public class MonsterTypeDAO extends GenericRepositoryBD<MonsterType> {
                 if (rs.next()) return mapRow(rs);
             }
         } catch (SQLException e) {
-            System.err.println("[MonsterTypeDAO.findById] " + e.getMessage());
+            throw new DatabaseException("[MonsterTypeDAO.findById] " + e.getMessage(), e);
         }
         return null;
     }
 
     /**
-     * Retrieves all MonsterType records from the database.
+     * Returns all {@link MonsterType} records stored in the database.
      *
-     * @return list of all monster types
+     * @return list of all monster types (may be empty, never {@code null})
+     * @throws DatabaseException if a SQL error occurs
      */
     @Override
     public List<MonsterType> findAll() {
@@ -111,25 +120,25 @@ public class MonsterTypeDAO extends GenericRepositoryBD<MonsterType> {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(mapRow(rs));
         } catch (SQLException e) {
-            System.err.println("[MonsterTypeDAO.findAll] " + e.getMessage());
+            throw new DatabaseException("[MonsterTypeDAO.findAll] " + e.getMessage(), e);
         }
         return list;
     }
 
     /**
-     * Maps a {@link ResultSet} row to a {@link MonsterType} object.
+     * Maps a single {@link ResultSet} row to a {@link MonsterType} instance.
      *
-     * @param rs the current ResultSet row
-     * @return populated MonsterType instance
+     * @param rs the current result-set row; must not be {@code null}
+     * @return a populated {@link MonsterType}
      * @throws SQLException if any column cannot be read
      */
     private MonsterType mapRow(ResultSet rs) throws SQLException {
         return new MonsterType(
-            rs.getInt("id"),
-            rs.getString("name"),
-            rs.getString("description"),
-            rs.getString("weakness"),
-            rs.getInt("terrorLevel")
+                rs.getInt("id"),
+                rs.getString("name"),
+                rs.getString("description"),
+                rs.getString("weakness"),
+                rs.getInt("terrorLevel")
         );
     }
 }

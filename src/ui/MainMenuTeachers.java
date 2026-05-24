@@ -162,7 +162,7 @@ public class MainMenuTeachers {
                 return;
             }
 
-            teacherService.deleteById(id);
+            teacherService.deleteTeacher(id);
             System.out.println("✅ Teacher deleted successfully.");
         } catch (Exception e) {
             System.out.println("Error: " + e.getMessage());
