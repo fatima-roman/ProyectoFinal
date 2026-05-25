@@ -140,10 +140,10 @@ public class CsvUtil {
                 String[] p = line.split(",", -1);
                 MonsterType mt = new MonsterType(
                         0,
+                        p[0].trim(),
                         p[1].trim(),
                         p[2].trim(),
-                        p[3].trim(),
-                        Integer.parseInt(p[4].trim())
+                        Integer.parseInt(p[3].trim())
                 );
                 dao.save(mt);
                 count++;
@@ -172,11 +172,11 @@ public class CsvUtil {
                 String[] p = line.split(",", -1);
                 Teacher t = new Teacher(
                         0,
+                        p[0].trim(),
                         p[1].trim(),
-                        p[2].trim(),
-                        LocalDate.parse(p[3].trim()),
-                        p[4].trim(),
-                        p[5].trim()
+                        LocalDate.parse(p[2].trim()),
+                        p[3].trim(),
+                        p[4].trim()
                 );
                 dao.save(t);
                 count++;
@@ -208,12 +208,12 @@ public class CsvUtil {
                 MonsterType mt = mtDao.findById(Integer.parseInt(p[7].trim()));
                 Student s = new Student(
                         0,
+                        p[0].trim(),
                         p[1].trim(),
-                        p[2].trim(),
-                        LocalDate.parse(p[3].trim()),
-                        p[4].trim(),
-                        Integer.parseInt(p[5].trim()),
-                        p[6].trim(),
+                        LocalDate.parse(p[2].trim()),
+                        p[3].trim(),
+                        Integer.parseInt(p[4].trim()),
+                        p[5].trim(),
                         mt
                 );
                 dao.save(s);
@@ -242,12 +242,12 @@ public class CsvUtil {
             while ((line = br.readLine()) != null) {
                 if (line.isBlank()) continue;
                 String[] p = line.split(",", -1);
-                int teacherId = Integer.parseInt(p[3].trim());
+                int teacherId = Integer.parseInt(p[2].trim());
                 Teacher t = teacherId > 0 ? teacherDao.findById(teacherId) : null;
                 Subject s = new Subject(
                         0,
-                        p[1].trim(),
-                        Integer.parseInt(p[2].trim()),
+                        p[0].trim(),
+                        Integer.parseInt(p[1].trim()),
                         t
                 );
                 dao.save(s);

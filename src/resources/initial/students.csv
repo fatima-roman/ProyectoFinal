@@ -1,6 +1,6 @@
-id,name,surname,birthDate,email,studentYear,groupName,monsterTypeId
-1,Draculaura,Von Bat,2008-10-31,draculaura@monsterhigh.edu,1,1A,1
-2,Clawdeen,Wolf,2007-09-09,clawdeen@monsterhigh.edu,2,2B,2
-3,Frankie,Stein,2009-09-01,frankie@monsterhigh.edu,1,1A,4
-4,Spectra,Vondergeist,2006-04-01,spectra@monsterhigh.edu,2,2A,3
-5,Lagoona,Blue,2007-07-21,lagoona@monsterhigh.edu,2,2B,2
+name,surname,birthDate,email,studentYear,groupName,monsterTypeId
+Gil,Webber,2007-08-14,gil.webber@monsterhigh.edu,1,1C,101
+Deuce,Gorgon,2007-11-13,deuce.gorgon@monsterhigh.edu,2,2C,102
+Cleo,De,Nile,2006-12-15,cleo.denile@monsterhigh.edu,2,2D,103
+Robecca,Steam,2008-01-19,robecca.steam@monsterhigh.edu,1,1D,104
+Operetta,Phantom,2007-05-05,operetta.phantom@monsterhigh.edu,1,1C,104

@@ -1,5 +1,5 @@
-id,name,description,weakness,terrorLevel
-1,Vampire,Blood-drinking undead creature of the night,Sunlight,9
-2,Werewolf,Full-moon shapeshifter with enhanced strength,Silver,8
-3,Ghost,Ethereal spirit that haunts the living,Salt,6
-4,Zombie,Reanimated undead with a hunger for brains,Fire,5
+name,description,weakness,terrorLevel
+Sea Monster,Oceanic creature from deep waters,Dehydration,8
+Gorgon,Serpentine monster with petrifying stare,Mirrors,9
+Mummy,Ancient wrapped undead guardian,Fire,7
+Harpy,Winged creature with piercing shriek,Thunder,6

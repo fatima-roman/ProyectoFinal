@@ -54,7 +54,7 @@ public class DatabaseConnection {
         // Solo inicializa el schema la primera vez en toda la ejecución
         if (!schemaInitialized) {
             initializeSchema();
-            initializeData();
+            //initializeData();
             schemaInitialized = true;
         }
     }
@@ -100,7 +100,7 @@ public class DatabaseConnection {
                 }
             }
             System.out.println("[DB] Schema inicializado correctamente.");
-            initializeData();
+            //initializeData();
 
         } catch (Exception e) {
             System.err.println("[DB] Error al inicializar schema: " + e.getMessage());
@@ -131,7 +131,7 @@ public class DatabaseConnection {
     /**
      * Inserta datos iniciales solo si las tablas están vacías.
      */
-    private void initializeData() {
+    /*private void initializeData() {
         try {
             try (Statement checkStmt = connection.createStatement();
                  ResultSet rs = checkStmt.executeQuery("SELECT COUNT(*) FROM STUDENT")) {
@@ -175,5 +175,5 @@ public class DatabaseConnection {
         } catch (Exception e) {
             System.err.println("[DB] Error al insertar datos: " + e.getMessage());
         }
-    }
+    }*/
 }
