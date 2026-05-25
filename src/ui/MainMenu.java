@@ -2,6 +2,8 @@ package ui;
 
 import java.util.Scanner;
 
+import util.CsvUtil;
+
 /**
  * Application entry point and main console menu for Monster High Institute Manager.
  * Delegates to entity-specific submenus for each management area.
@@ -20,6 +22,11 @@ public class MainMenu {
      * @param args command-line arguments (not used)
      */
     public static void main(String[] args) {
+        CsvUtil.importMonsterTypes();
+        CsvUtil.importTeachers();
+        CsvUtil.importStudents();
+        CsvUtil.importSubjects();
+
         int option;
         do {
             printMenu();
@@ -33,8 +40,15 @@ public class MainMenu {
                 case 6 -> MainMenuReports.start();
                 case 7 -> MainMenuMonsterType.start();
                 case 8 -> MainMenuImportExport.start();
-                case 0 -> System.out.println("\nGoodbye! 🖤");
-                default -> System.out.println("Invalid option, please try again.");
+                case 0 -> {
+                    // Guardado automático al salir
+                    System.out.println("Guardando datos en CSV...");
+                    CsvUtil.exportStudents();
+                    CsvUtil.exportTeachers();
+                    CsvUtil.exportSubjects();
+                    System.out.println("\n¡Hasta luego! 🖤");
+                }
+                default -> System.out.println("Opción no válida, inténtalo de nuevo.");
             }
         } while (option != 0);
         sc.close();

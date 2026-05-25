@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import model.interfaces.Buscable;
 import model.interfaces.Exportable;
 
 /**
@@ -13,8 +15,8 @@ import model.interfaces.Exportable;
  * @author Fatima Roman
  * @version 1.1
  */
-public class Teacher extends Person implements Exportable {
-
+public class Teacher extends Person implements Exportable, Buscable {
+	
     /** Teaching specialty of this teacher. */
     private String specialty;
 
@@ -126,4 +128,15 @@ public class Teacher extends Person implements Exportable {
     /** {@inheritDoc} */
     @Override
     public int hashCode() { return Objects.hash(id); }
+    
+    /**	{@inheritDoc}
+     */
+    @Override
+    public boolean matches(String keyword) {
+        if (keyword == null) return false;
+        String k = keyword.toLowerCase();
+        return name.toLowerCase().contains(k)
+            || surname.toLowerCase().contains(k)
+            || specialty.toLowerCase().contains(k);
+    }
 }

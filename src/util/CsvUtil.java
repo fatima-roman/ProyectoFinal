@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class CsvUtil {
 
-    // ── Default paths ───────────────────────────────────────────────────────
+    //Default paths
 
     /** Default CSV path for student data. */
     public static final String STUDENTS_PATH  = "resources/initial_data/students.csv";
@@ -52,7 +52,7 @@ public class CsvUtil {
     /** Export output path for subjects. */
     public static final String EXPORT_SUBJECTS_PATH  = "resources/export/subjects_export.csv";
 
-    // ── DAO instances (package-private, reused by no-arg methods) ──────────
+    //DAO instances (package-private, reused by no-arg methods)
 
     private static final MonsterTypeDAO mtDao      = new MonsterTypeDAO();
     private static final TeacherDAO     teacherDao  = new TeacherDAO();
@@ -61,8 +61,6 @@ public class CsvUtil {
 
     /** Private constructor — utility class, never instantiated. */
     private CsvUtil() {}
-
-    // ── No-arg import methods (called from MainMenuImportExport) ────────────
 
     /**
      * Imports {@link Student} records from the default CSV path.
@@ -94,8 +92,6 @@ public class CsvUtil {
         importMonsterTypes(MONSTER_TYPES_PATH, mtDao);
     }
 
-    // ── No-arg export methods (called from MainMenuImportExport) ────────────
-
     /**
      * Exports all {@link Student} records to the default export path.
      */
@@ -126,8 +122,6 @@ public class CsvUtil {
                 list.stream().map(Subject::toCsv).toList());
     }
 
-    // ── Parameterised import methods (used by no-arg versions and tests) ───
-
     /**
      * Imports {@link MonsterType} records from the specified CSV file.
      * Expected CSV format (with header): {@code id,name,description,weakness,terrorLevel}
@@ -145,7 +139,7 @@ public class CsvUtil {
                 if (line.isBlank()) continue;
                 String[] p = line.split(",", -1);
                 MonsterType mt = new MonsterType(
-                        0, // AUTOINCREMENT — DB assigns the real id
+                        0,
                         p[1].trim(),
                         p[2].trim(),
                         p[3].trim(),
@@ -177,7 +171,7 @@ public class CsvUtil {
                 if (line.isBlank()) continue;
                 String[] p = line.split(",", -1);
                 Teacher t = new Teacher(
-                        0, // AUTOINCREMENT
+                        0,
                         p[1].trim(),
                         p[2].trim(),
                         LocalDate.parse(p[3].trim()),
@@ -213,7 +207,7 @@ public class CsvUtil {
                 String[] p = line.split(",", -1);
                 MonsterType mt = mtDao.findById(Integer.parseInt(p[7].trim()));
                 Student s = new Student(
-                        0, // AUTOINCREMENT
+                        0,
                         p[1].trim(),
                         p[2].trim(),
                         LocalDate.parse(p[3].trim()),
@@ -251,7 +245,7 @@ public class CsvUtil {
                 int teacherId = Integer.parseInt(p[3].trim());
                 Teacher t = teacherId > 0 ? teacherDao.findById(teacherId) : null;
                 Subject s = new Subject(
-                        0, // AUTOINCREMENT
+                        0,
                         p[1].trim(),
                         Integer.parseInt(p[2].trim()),
                         t
@@ -265,7 +259,6 @@ public class CsvUtil {
         }
     }
 
-    // ── Internal export helper ───────────────────────────────────────────────
 
     /**
      * Writes a list of CSV lines to the specified file, creating parent directories

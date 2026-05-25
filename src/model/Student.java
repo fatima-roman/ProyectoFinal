@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import model.interfaces.Buscable;
 import model.interfaces.Evaluable;
 import model.interfaces.Exportable;
 
@@ -12,10 +14,9 @@ import model.interfaces.Exportable;
  * Extends {@link Person} and implements {@link Evaluable} and {@link Exportable}.
  *
  * @author Fatima
- * @version 1.1
+ * @version 1.2
  */
-public class Student extends Person implements Exportable, Evaluable {
-    private int studentYear;
+public class Student extends Person implements Exportable, Evaluable, Buscable {    private int studentYear;
     private String groupName;
     private MonsterType monsterType;
     private List<Enrollment> enrollments;
@@ -162,4 +163,14 @@ public class Student extends Person implements Exportable, Evaluable {
 
     @Override
     public int hashCode() { return Objects.hash(id); }
+    
+    @Override
+    public boolean matches(String keyword) {
+        if (keyword == null) return false;
+        String k = keyword.toLowerCase();
+        return name.toLowerCase().contains(k)
+            || surname.toLowerCase().contains(k)
+            || email.toLowerCase().contains(k)
+            || groupName.toLowerCase().contains(k);
+    }
 }
