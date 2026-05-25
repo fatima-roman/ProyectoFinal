@@ -258,6 +258,60 @@ public class CsvUtil {
             System.err.println("CsvUtil.importSubjects: " + e.getMessage());
         }
     }
+    
+    /**
+     * Updates the initial students CSV file with the current database state.
+     * Overwrites {@code src/resources/initial/students.csv}.
+     */
+    public static void updateStudents() {
+        List<Student> list = studentDao.findAll();
+        exportToFile(STUDENTS_PATH,
+                "name,surname,birthDate,email,studentYear,groupName,monsterTypeId",
+                list.stream()
+                        .map(s -> String.format("%s,%s,%s,%s,%d,%s,%d",
+                                s.getName(),
+                                s.getSurname(),
+                                s.getBirthDate(),
+                                s.getEmail(),
+                                s.getStudentYear(),
+                                s.getGroupName(),
+                                s.getMonsterType().getId()))
+                        .toList());
+    }
+
+    /**
+     * Updates the initial teachers CSV file with the current database state.
+     * Overwrites {@code src/resources/initial/teachers.csv}.
+     */
+    public static void updateTeachers() {
+        List<Teacher> list = teacherDao.findAll();
+        exportToFile(TEACHERS_PATH,
+                "name,surname,birthDate,email,specialty",
+                list.stream()
+                        .map(t -> String.format("%s,%s,%s,%s,%s",
+                                t.getName(),
+                                t.getSurname(),
+                                t.getBirthDate(),
+                                t.getEmail(),
+                                t.getSpecialty()))
+                        .toList());
+    }
+
+    /**
+     * Updates the initial subjects CSV file with the current database state.
+     * Overwrites {@code src/resources/initial/subjects.csv}.
+     */
+    public static void updateSubjects() {
+        List<Subject> list = subjectDao.findAll();
+        exportToFile(SUBJECTS_PATH,
+                "name,course,teacherId",
+                list.stream()
+                        .map(s -> String.format("%s,%d,%d",
+                                s.getName(),
+                                s.getCourse(),
+                                s.getTeacher() != null ? s.getTeacher().getId() : 0))
+                        .toList());
+    }
 
 
     /**

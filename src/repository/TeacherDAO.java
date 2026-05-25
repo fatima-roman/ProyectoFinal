@@ -23,7 +23,7 @@ public class TeacherDAO extends GenericRepositoryBD<Teacher> {
      */
     @Override
     public void save(Teacher t) {
-        String sql = "INSERT INTO TEACHER(id, name, surname, birthDate, email, specialty) " +
+        String sql = "INSERT INTO TEACHER(name, surname, birthDate, email, specialty) " +
                      "VALUES(?, ?, ?, ?, ?)";
         try (Connection c = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {

@@ -24,7 +24,7 @@ public class SubjectDAO extends GenericRepositoryBD<Subject> {
      */
     @Override
     public void save(Subject s) {
-        String sql = "INSERT INTO SUBJECT(id, name, course, teacherId) VALUES(?, ?, ?)";
+        String sql = "INSERT INTO SUBJECT(name, course, teacherId) VALUES(?, ?, ?)";
         try (Connection c = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, s.getName());

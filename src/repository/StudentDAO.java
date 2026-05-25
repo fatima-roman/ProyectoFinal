@@ -34,7 +34,7 @@ public class StudentDAO extends GenericRepositoryBD<Student> {
      */
     @Override
     public void save(Student student) {
-        String sql = "INSERT INTO STUDENT(id, name, surname, birthDate, email, " +
+        String sql = "INSERT INTO STUDENT(name, surname, birthDate, email, " +
                      "studentYear, groupName, monsterTypeId) VALUES(?,?,?,?,?,?,?)";
 
         try (Connection c = DatabaseConnection.getInstance().getConnection();

@@ -8,7 +8,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -54,7 +53,6 @@ public class DatabaseConnection {
         // Solo inicializa el schema la primera vez en toda la ejecución
         if (!schemaInitialized) {
             initializeSchema();
-            //initializeData();
             schemaInitialized = true;
         }
     }
@@ -100,7 +98,6 @@ public class DatabaseConnection {
                 }
             }
             System.out.println("[DB] Schema inicializado correctamente.");
-            //initializeData();
 
         } catch (Exception e) {
             System.err.println("[DB] Error al inicializar schema: " + e.getMessage());
@@ -128,52 +125,5 @@ public class DatabaseConnection {
         }
     }
     
-    /**
-     * Inserta datos iniciales solo si las tablas están vacías.
-     */
-    /*private void initializeData() {
-        try {
-            try (Statement checkStmt = connection.createStatement();
-                 ResultSet rs = checkStmt.executeQuery("SELECT COUNT(*) FROM STUDENT")) {
-                if (rs.getInt(1) > 0) {
-                    System.out.println("[DB] Datos ya existentes, no se insertan de nuevo.");
-                    return;
-                }
-            }
-
-            URL dataUrl = DatabaseConnection.class
-                    .getClassLoader()
-                    .getResource("resources/data.sql");
-
-            if (dataUrl == null) {
-                String projectDir = System.getProperty("user.dir");
-                Path dataPath = Paths.get(projectDir, "src", "resources", "data.sql");
-                dataUrl = dataPath.toUri().toURL();
-            }
-
-            StringBuilder sql = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(dataUrl.openStream()))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String trimmed = line.trim();
-                    if (trimmed.startsWith("--") || trimmed.isEmpty()) continue;
-                    sql.append(trimmed).append(" ");
-                }
-            }
-
-            for (String statement : sql.toString().split(";")) {
-                String s = statement.trim();
-                if (!s.isEmpty()) {
-                    try (Statement stmt = connection.createStatement()) {
-                        stmt.execute(s);
-                    }
-                }
-            }
-            System.out.println("[DB] Datos iniciales insertados correctamente.");
-
-        } catch (Exception e) {
-            System.err.println("[DB] Error al insertar datos: " + e.getMessage());
-        }
-    }*/
+   
 }
