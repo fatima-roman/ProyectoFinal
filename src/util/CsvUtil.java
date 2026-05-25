@@ -32,16 +32,16 @@ public class CsvUtil {
     //Default paths
 
     /** Default CSV path for student data. */
-    public static final String STUDENTS_PATH  = "resources/initial_data/students.csv";
+    public static final String STUDENTS_PATH  = "src/resources/initial/students.csv";
 
     /** Default CSV path for teacher data. */
-    public static final String TEACHERS_PATH  = "resources/initial_data/teachers.csv";
+    public static final String TEACHERS_PATH  = "src/resources/initial/teachers.csv";
 
     /** Default CSV path for subject data. */
-    public static final String SUBJECTS_PATH  = "resources/initial_data/subjects.csv";
+    public static final String SUBJECTS_PATH  = "src/resources/initial/subjects.csv";
 
     /** Default CSV path for monster type data. */
-    public static final String MONSTER_TYPES_PATH = "resources/initial_data/monster_types.csv";
+    public static final String MONSTER_TYPES_PATH = "src/resources/initial/monster_types.csv";
 
     /** Export output path for students. */
     public static final String EXPORT_STUDENTS_PATH  = "resources/export/students_export.csv";
