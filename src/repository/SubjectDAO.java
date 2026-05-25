@@ -24,18 +24,16 @@ public class SubjectDAO extends GenericRepositoryBD<Subject> {
      */
     @Override
     public void save(Subject s) {
-        String sql = "INSERT INTO SUBJECT(id, name, course, teacherId) VALUES(?, ?, ?, ?)";
+        String sql = "INSERT INTO SUBJECT(id, name, course, teacherId) VALUES(?, ?, ?)";
         try (Connection c = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
-
-            ps.setInt(1, s.getId());
-            ps.setString(2, s.getName());
-            ps.setInt(3, s.getCourse());
+            ps.setString(1, s.getName());
+            ps.setInt(2, s.getCourse());
 
             if (s.getTeacher() != null) {
-                ps.setInt(4, s.getTeacher().getId());
+                ps.setInt(3, s.getTeacher().getId());
             } else {
-                ps.setNull(4, Types.INTEGER);
+                ps.setNull(3, Types.INTEGER);
             }
 
             ps.executeUpdate();

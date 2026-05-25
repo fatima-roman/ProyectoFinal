@@ -205,7 +205,7 @@ public class CsvUtil {
             while ((line = br.readLine()) != null) {
                 if (line.isBlank()) continue;
                 String[] p = line.split(",", -1);
-                MonsterType mt = mtDao.findById(Integer.parseInt(p[7].trim()));
+                MonsterType mt = mtDao.findById(Integer.parseInt(p[6].trim()));
                 Student s = new Student(
                         0,
                         p[0].trim(),

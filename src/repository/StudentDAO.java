@@ -35,24 +35,22 @@ public class StudentDAO extends GenericRepositoryBD<Student> {
     @Override
     public void save(Student student) {
         String sql = "INSERT INTO STUDENT(id, name, surname, birthDate, email, " +
-                     "studentYear, groupName, monsterTypeId) VALUES(?,?,?,?,?,?,?,?)";
+                     "studentYear, groupName, monsterTypeId) VALUES(?,?,?,?,?,?,?)";
 
         try (Connection c = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
-
-            ps.setInt   (1, student.getId());
-            ps.setString(2, student.getName());
-            ps.setString(3, student.getSurname());
-            ps.setString(4, student.getBirthDate() != null
+            ps.setString(1, student.getName());
+            ps.setString(2, student.getSurname());
+            ps.setString(3, student.getBirthDate() != null
                             ? student.getBirthDate().toString() : null);
-            ps.setString(5, student.getEmail());
-            ps.setInt   (6, student.getStudentYear());
-            ps.setString(7, student.getGroupName());
+            ps.setString(4, student.getEmail());
+            ps.setInt   (5, student.getStudentYear());
+            ps.setString(6, student.getGroupName());
 
             if (student.getMonsterType() != null) {
-                ps.setInt(8, student.getMonsterType().getId());
+                ps.setInt(7, student.getMonsterType().getId());
             } else {
-                ps.setNull(8, Types.INTEGER);
+                ps.setNull(7, Types.INTEGER);
             }
 
             ps.executeUpdate();

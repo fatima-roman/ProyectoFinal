@@ -24,15 +24,14 @@ public class TeacherDAO extends GenericRepositoryBD<Teacher> {
     @Override
     public void save(Teacher t) {
         String sql = "INSERT INTO TEACHER(id, name, surname, birthDate, email, specialty) " +
-                     "VALUES(?, ?, ?, ?, ?, ?)";
+                     "VALUES(?, ?, ?, ?, ?)";
         try (Connection c = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, t.getId());
-            ps.setString(2, t.getName());
-            ps.setString(3, t.getSurname());
-            ps.setString(4, t.getBirthDate() != null ? t.getBirthDate().toString() : null);
-            ps.setString(5, t.getEmail());
-            ps.setString(6, t.getSpecialty());
+            ps.setString(1, t.getName());
+            ps.setString(2, t.getSurname());
+            ps.setString(3, t.getBirthDate() != null ? t.getBirthDate().toString() : null);
+            ps.setString(4, t.getEmail());
+            ps.setString(5, t.getSpecialty());
             ps.executeUpdate();
         } catch (SQLException e) {
             System.err.println("[TeacherDAO.save] " + e.getMessage());
