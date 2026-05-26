@@ -14,7 +14,7 @@ import java.util.Scanner;
  * Provides full CRUD operations on {@link Teacher} entities via {@link TeacherService}.
  *
  * @author Fatima Roman
- * @version 1.0
+ * @version 1.1
  */
 public class MainMenuTeacher {
 
@@ -80,13 +80,14 @@ public class MainMenuTeacher {
 
     /**
      * Prompts for all teacher fields and saves a new teacher.
+     * Validates email format and that the birth date is not in the future.
      */
     private static void addTeacher() {
         System.out.println("\n--- Add New Teacher ---");
         System.out.print("Name: ");        String name = sc.nextLine().trim();
         System.out.print("Surname: ");     String surname = sc.nextLine().trim();
-        System.out.print("Birth date (YYYY-MM-DD): "); LocalDate bd = readDate();
-        System.out.print("Email: ");       String email = sc.nextLine().trim();
+        System.out.print("Birth date (YYYY-MM-DD): "); LocalDate bd = readPastOrPresentDate();
+        System.out.print("Email: ");       String email = readEmail();
         System.out.print("Specialty: ");   String specialty = sc.nextLine().trim();
         Teacher t = new Teacher(0, name, surname, bd, email, specialty);
         try { teacherService.save(t); System.out.println("Teacher added successfully!"); }
@@ -95,6 +96,7 @@ public class MainMenuTeacher {
 
     /**
      * Prompts for an ID, loads the existing teacher, then allows updating each field.
+     * Validates email format and that the new birth date is not in the future.
      */
     private static void updateTeacher() {
         System.out.print("\nEnter the ID of the teacher to update: ");
@@ -110,11 +112,25 @@ public class MainMenuTeacher {
         String name = readOptional(existing.getName());
         System.out.print("New surname [" + existing.getSurname() + "]: ");
         String surname = readOptional(existing.getSurname());
+
         System.out.print("New birth date [" + existing.getBirthDate() + "] (YYYY-MM-DD): ");
         String rawDate = sc.nextLine().trim();
-        LocalDate bd = rawDate.isEmpty() ? existing.getBirthDate() : parseDate(rawDate, existing.getBirthDate());
+        LocalDate bd = rawDate.isEmpty()
+                ? existing.getBirthDate()
+                : parsePastOrPresentDate(rawDate, existing.getBirthDate());
+
         System.out.print("New email [" + existing.getEmail() + "]: ");
-        String email = readOptional(existing.getEmail());
+        String rawEmail = sc.nextLine().trim();
+        String email;
+        if (rawEmail.isEmpty()) {
+            email = existing.getEmail();
+        } else if (isValidEmail(rawEmail)) {
+            email = rawEmail;
+        } else {
+            System.out.println("Invalid email format. The original value will be kept.");
+            email = existing.getEmail();
+        }
+
         System.out.print("New specialty [" + existing.getSpecialty() + "]: ");
         String specialty = readOptional(existing.getSpecialty());
 
@@ -139,27 +155,75 @@ public class MainMenuTeacher {
     }
 
     /**
-     * Reads a valid ISO date, re-prompting on invalid input.
+     * Validates that an email address has a basic valid format:
+     * it must contain '@', have at least one character before it,
+     * and at least one '.' after it.
      *
-     * @return parsed {@link LocalDate}
+     * @param email the email string to validate
+     * @return {@code true} if the format is acceptable
      */
-    private static LocalDate readDate() {
+    private static boolean isValidEmail(String email) {
+        if (email == null || email.isBlank()) return false;
+        int at = email.indexOf('@');
+        if (at <= 0) return false;
+        String domain = email.substring(at + 1);
+        return domain.contains(".") && !domain.startsWith(".");
+    }
+
+    /**
+     * Reads an email from the console, repeating until a valid format is entered.
+     *
+     * @return a valid email string
+     */
+    private static String readEmail() {
         while (true) {
-            try { return LocalDate.parse(sc.nextLine().trim()); }
-            catch (DateTimeParseException e) { System.out.print("Invalid date, use YYYY-MM-DD: "); }
+            String input = sc.nextLine().trim();
+            if (isValidEmail(input)) return input;
+            System.out.print("Invalid email format (example: user@domain.com). Try again: ");
         }
     }
 
     /**
-     * Parses a date string; returns {@code defaultValue} if parsing fails.
+     * Reads a date from the console that is today or in the past,
+     * repeating until a valid value is entered.
+     *
+     * @return a {@link LocalDate} that is not in the future
+     */
+    private static LocalDate readPastOrPresentDate() {
+        while (true) {
+            try {
+                LocalDate date = LocalDate.parse(sc.nextLine().trim());
+                if (date.isAfter(LocalDate.now())) {
+                    System.out.print("The birth date cannot be in the future. Use YYYY-MM-DD: ");
+                } else {
+                    return date;
+                }
+            } catch (DateTimeParseException e) {
+                System.out.print("Invalid date, use YYYY-MM-DD: ");
+            }
+        }
+    }
+
+    /**
+     * Attempts to parse a date that must not be in the future.
+     * Returns {@code defaultValue} if parsing fails or the date is in the future.
      *
      * @param raw          raw date string
      * @param defaultValue fallback date
-     * @return parsed date or fallback
+     * @return parsed date or {@code defaultValue}
      */
-    private static LocalDate parseDate(String raw, LocalDate defaultValue) {
-        try { return LocalDate.parse(raw); }
-        catch (DateTimeParseException e) { System.out.println("Invalid date, keeping original."); return defaultValue; }
+    private static LocalDate parsePastOrPresentDate(String raw, LocalDate defaultValue) {
+        try {
+            LocalDate date = LocalDate.parse(raw);
+            if (date.isAfter(LocalDate.now())) {
+                System.out.println("The birth date cannot be in the future. The original value will be kept.");
+                return defaultValue;
+            }
+            return date;
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format. The original value will be kept.");
+            return defaultValue;
+        }
     }
 
     /**

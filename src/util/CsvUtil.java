@@ -328,7 +328,6 @@ public class CsvUtil {
         try (PrintWriter pw = new PrintWriter(new FileWriter(file))) {
             pw.println(header);
             lines.forEach(pw::println);
-            System.out.println("Exported " + lines.size() + " records to " + path);
         } catch (IOException e) {
             System.err.println("CsvUtil.exportToFile: " + e.getMessage());
         }

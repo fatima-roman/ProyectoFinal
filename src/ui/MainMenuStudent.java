@@ -2,8 +2,10 @@ package ui;
 
 import exceptions.InvalidMonsterTypeException;
 import exceptions.StudentNotFoundException;
+import model.MonsterHighGroup;
 import model.MonsterType;
 import model.Student;
+import repository.MonsterHighGroupDAO;
 import service.MonsterTypeService;
 import service.StudentService;
 
@@ -18,7 +20,7 @@ import java.util.Scanner;
  * through {@link StudentService}.
  *
  * @author Fátima Román
- * @version 2.2
+ * @version 2.3
  */
 public class MainMenuStudent {
 
@@ -30,6 +32,9 @@ public class MainMenuStudent {
 
     /** Service layer for resolving monster types. */
     private static final MonsterTypeService monsterTypeService = new MonsterTypeService();
+
+    /** DAO for resolving group existence. */
+    private static final MonsterHighGroupDAO groupDAO = new MonsterHighGroupDAO();
 
     /**
      * Starts the student submenu loop.
@@ -93,7 +98,8 @@ public class MainMenuStudent {
 
     /**
      * Requests all fields and saves a new student.
-     * Resolves the {@link MonsterType} from the database before creating the student.
+     * Validates email format, birth date (must not be in the future),
+     * group existence in the database, and resolves the {@link MonsterType}.
      */
     private static void addStudent() {
         System.out.println("\n--- Add New Student ---");
@@ -102,13 +108,13 @@ public class MainMenuStudent {
         System.out.print("Surname: ");
         String surname = sc.nextLine().trim();
         System.out.print("Birth date (YYYY-MM-DD): ");
-        LocalDate birthDate = readDate();
+        LocalDate birthDate = readPastOrPresentDate();
         System.out.print("Email: ");
-        String email = sc.nextLine().trim();
+        String email = readEmail();
         System.out.print("Year (1 or 2): ");
         int year = readYear();
-        System.out.print("Group (e.g. 1A): ");
-        String groupName = sc.nextLine().trim();
+
+        String groupName = readExistingGroupName();
 
         System.out.println("Available monster types:");
         monsterTypeService.findAll().forEach(mt ->
@@ -136,6 +142,8 @@ public class MainMenuStudent {
 
     /**
      * Requests an ID, loads the existing record and allows modifying each field.
+     * Validates email format, birth date (must not be in the future),
+     * and group existence when a new group name is provided.
      */
     private static void updateStudent() {
         System.out.print("\nStudent ID to update: ");
@@ -154,24 +162,47 @@ public class MainMenuStudent {
         String name = readOptional(existing.getName());
         System.out.print("New surname [" + existing.getSurname() + "]: ");
         String surname = readOptional(existing.getSurname());
+
+        // Birth date: validate it is not in the future
         System.out.print("New birth date [" + existing.getBirthDate() + "] (YYYY-MM-DD): ");
         String rawDate = sc.nextLine().trim();
-        LocalDate birthDate = rawDate.isEmpty()
-                ? existing.getBirthDate() : parseDate(rawDate, existing.getBirthDate());
+        LocalDate birthDate;
+        if (rawDate.isEmpty()) {
+            birthDate = existing.getBirthDate();
+        } else {
+            birthDate = parsePastOrPresentDate(rawDate, existing.getBirthDate());
+        }
+
         System.out.print("New email [" + existing.getEmail() + "]: ");
-        String email = readOptional(existing.getEmail());
+        String rawEmail = sc.nextLine().trim();
+        String email;
+        if (rawEmail.isEmpty()) {
+            email = existing.getEmail();
+        } else if (isValidEmail(rawEmail)) {
+            email = rawEmail;
+        } else {
+            System.out.println("Invalid email format. The original value will be kept.");
+            email = existing.getEmail();
+        }
+
         System.out.print("New year [" + existing.getStudentYear() + "]: ");
         String rawYear = sc.nextLine().trim();
         int year = rawYear.isEmpty() ? existing.getStudentYear() : parseIntSafe(rawYear, existing.getStudentYear());
+
         System.out.print("New group [" + existing.getGroupName() + "]: ");
-        String groupName = readOptional(existing.getGroupName());
+        String rawGroup = sc.nextLine().trim();
+        String groupName;
+        if (rawGroup.isEmpty()) {
+            groupName = existing.getGroupName();
+        } else {
+            groupName = validateGroupExists(rawGroup, existing.getGroupName());
+        }
 
         int currentMtId = existing.getMonsterType() != null ? existing.getMonsterType().getId() : 0;
         System.out.print("New Monster Type ID [" + currentMtId + "]: ");
         String rawMtId = sc.nextLine().trim();
         int mtId = rawMtId.isEmpty() ? currentMtId : parseIntSafe(rawMtId, currentMtId);
 
-        // FIX: resolve the real MonsterType
         MonsterType mt;
         try {
             mt = monsterTypeService.findById(mtId);
@@ -210,35 +241,120 @@ public class MainMenuStudent {
         }
     }
 
-    // ── Helper reading methods ───────────────────────────────────────────
+    /**
+     * Validates that an email address has a basic valid format:
+     * it must contain '@', have at least one character before it,
+     * and at least one '.' after it.
+     *
+     * @param email the email string to validate
+     * @return {@code true} if the format is acceptable
+     */
+    private static boolean isValidEmail(String email) {
+        if (email == null || email.isBlank()) return false;
+        int at = email.indexOf('@');
+        if (at <= 0) return false;                        // '@' must not be first
+        String domain = email.substring(at + 1);
+        return domain.contains(".") && !domain.startsWith(".");
+    }
 
     /**
-     * Reads a valid ISO date, repeating if the input is invalid.
+     * Reads an email from the console, repeating until a valid format is entered.
      *
-     * @return parsed {@link LocalDate}
+     * @return a valid email string
      */
-    private static LocalDate readDate() {
+    private static String readEmail() {
         while (true) {
-            try { return LocalDate.parse(sc.nextLine().trim()); }
-            catch (DateTimeParseException e) {
+            String input = sc.nextLine().trim();
+            if (isValidEmail(input)) return input;
+            System.out.print("Invalid email format (example: user@domain.com). Try again: ");
+        }
+    }
+
+    /**
+     * Reads a date from the console that is today or in the past,
+     * repeating until a valid value is entered.
+     *
+     * @return a {@link LocalDate} that is not in the future
+     */
+    private static LocalDate readPastOrPresentDate() {
+        while (true) {
+            try {
+                LocalDate date = LocalDate.parse(sc.nextLine().trim());
+                if (date.isAfter(LocalDate.now())) {
+                    System.out.print("The birth date cannot be in the future. Use YYYY-MM-DD: ");
+                } else {
+                    return date;
+                }
+            } catch (DateTimeParseException e) {
                 System.out.print("Invalid date, use the format YYYY-MM-DD: ");
             }
         }
     }
 
     /**
-     * Attempts to parse a date; returns {@code defaultValue} if it fails.
+     * Attempts to parse a date that must not be in the future.
+     * Returns {@code defaultValue} if the format is wrong or the date is future.
      *
-     * @param raw          date string
+     * @param raw          raw date string
      * @param defaultValue fallback date
      * @return parsed date or {@code defaultValue}
      */
-    private static LocalDate parseDate(String raw, LocalDate defaultValue) {
-        try { return LocalDate.parse(raw); }
-        catch (DateTimeParseException e) {
-            System.out.println("Invalid date, the original one will be kept.");
+    private static LocalDate parsePastOrPresentDate(String raw, LocalDate defaultValue) {
+        try {
+            LocalDate date = LocalDate.parse(raw);
+            if (date.isAfter(LocalDate.now())) {
+                System.out.println("The birth date cannot be in the future. The original value will be kept.");
+                return defaultValue;
+            }
+            return date;
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid date format. The original value will be kept.");
             return defaultValue;
         }
+    }
+
+    /**
+     * Reads a group name that already exists in the database,
+     * prompting again if the name is not found.
+     *
+     * @return a group name that exists in the database
+     */
+    private static String readExistingGroupName() {
+        List<MonsterHighGroup> groups = groupDAO.findAll();
+        if (groups.isEmpty()) {
+            System.out.println("Warning: no groups are registered in the database yet.");
+            System.out.print("Group name: ");
+            return sc.nextLine().trim();
+        }
+        System.out.println("Available groups:");
+        groups.forEach(g -> System.out.println("  " + g.getName()));
+        while (true) {
+            System.out.print("Group name: ");
+            String input = sc.nextLine().trim();
+            boolean exists = groups.stream()
+                    .anyMatch(g -> g.getName().equalsIgnoreCase(input));
+            if (exists) return input;
+            System.out.println("Group '" + input + "' does not exist. Please choose one from the list above.");
+        }
+    }
+
+    /**
+     * Validates that the given group name exists in the database.
+     * Returns {@code defaultValue} and prints a warning if not found.
+     *
+     * @param groupName    the name to validate
+     * @param defaultValue fallback group name
+     * @return validated group name or {@code defaultValue}
+     */
+    private static String validateGroupExists(String groupName, String defaultValue) {
+        List<MonsterHighGroup> groups = groupDAO.findAll();
+        boolean exists = groups.stream()
+                .anyMatch(g -> g.getName().equalsIgnoreCase(groupName));
+        if (!exists) {
+            System.out.println("Group '" + groupName + "' does not exist. The original group will be kept.");
+            return defaultValue;
+        }
+        return groupName;
     }
 
     /**
