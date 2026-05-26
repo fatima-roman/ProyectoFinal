@@ -103,8 +103,6 @@ public class MainMenuGrade {
         }
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────
-
     /**
      * Reads a grade value in [0, 10], re-prompting until valid.
      *

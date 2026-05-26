@@ -134,8 +134,6 @@ public class MainMenuEnrollment {
         }
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────
-
     /**
      * Reads a grade value in [0, 10], re-prompting until valid.
      *

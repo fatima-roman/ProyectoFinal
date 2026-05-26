@@ -138,8 +138,6 @@ public class MainMenuTeacher {
         } catch (TeacherNotFoundException e) { System.out.println("Error: " + e.getMessage()); }
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────
-
     /**
      * Reads a valid ISO date, re-prompting on invalid input.
      *

@@ -41,14 +41,13 @@ public class MainMenu {
                 case 7 -> MainMenuMonsterType.start();
                 case 8 -> MainMenuImportExport.start();
                 case 0 -> {
-                    // Guardado automático al salir
-                    System.out.println("Guardando datos en CSV...");
+                    System.out.println("Saving data in CSV format...");
                     CsvUtil.updateStudents();
                     CsvUtil.updateSubjects();
                     CsvUtil.updateTeachers();
-                    System.out.println("\n¡Hasta luego! 🖤");
+                    System.out.println("\nByee! 🖤");
                 }
-                default -> System.out.println("Opción no válida, inténtalo de nuevo.");
+                default -> System.out.println("Invalid option, please try again.");
             }
         } while (option != 0);
         sc.close();

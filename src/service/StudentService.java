@@ -10,6 +10,7 @@ import repository.EnrollmentDAO;
 import repository.StudentDAO;
 
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
  * enforcing business rules before any database access.
  *
  * @author Fatima Roman
- * @version 2.1
+ * @version 2.2
  */
 public class StudentService {
 
@@ -29,8 +30,6 @@ public class StudentService {
 
     /** DAO used to interact with the ENROLLMENT table. */
     private final EnrollmentDAO enrollmentDAO = new EnrollmentDAO();
-
-    // ── CRUD ──────────────────────────────────────────────────────────────
 
     /**
      * Finds a student by its primary key.
@@ -88,8 +87,6 @@ public class StudentService {
         studentDAO.deleteById(id);
     }
 
-    // ── Enrollment ────────────────────────────────────────────────────────
-
     /**
      * Enrolls a student in a subject with two partial grades.
      *
@@ -112,8 +109,6 @@ public class StudentService {
         enrollmentDAO.save(enrollment);
         student.enrollSubject(enrollment);
     }
-
-    // ── Stream operations ─────────────────────────────────────────────────
 
     /**
      * Returns all students sorted by surname.
@@ -180,5 +175,20 @@ public class StudentService {
                 .mapToDouble(Student::calculateFinalGrade)
                 .average()
                 .orElse(0.0);
+    }
+
+    /**
+     * Builds an index of students keyed by their ID for fast lookup.
+     * Uses {@link HashMap} to provide O(1) access by key, more efficient
+     * than iterating a list when frequent lookups by ID are needed.
+     *
+     * @return map of student ID to {@link Student} object
+     */
+    public Map<Integer, Student> buildIndexById() {
+        Map<Integer, Student> index = new HashMap<>();
+        for (Student s : studentDAO.findAll()) {
+            index.put(s.getId(), s);
+        }
+        return index;
     }
 }

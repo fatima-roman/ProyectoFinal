@@ -150,8 +150,6 @@ public class MainMenuSubject {
         } catch (SubjectNotFoundException e) { System.out.println("Error: " + e.getMessage()); }
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────
-
     /**
      * Reads a course year (1 or 2), re-prompting until valid.
      *

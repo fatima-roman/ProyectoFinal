@@ -12,8 +12,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * Singleton que gestiona la conexión JDBC con la base de datos SQLite.
- * Crea y inicializa el schema automáticamente si no existe.
+* Singleton that manages the JDBC connection to the SQLite database.
+* Automatically creates and initializes the schema if it doesn't exist.
  * @author Fatima Roman
  * @version 3.0
  */
@@ -23,23 +23,21 @@ public class DatabaseConnection {
 
     static {
         try {
-            // Busca la carpeta raíz del proyecto (donde está el .classpath)
-            // y pone el .db en src/resources/
+        	// Locate the project's root folder (where the .classpath is located)
+        	// and place the .db file in src/resources/
             String projectDir = System.getProperty("user.dir");
             Path dbPath = Paths.get(projectDir, "src", "resources", "monsterhigh.db");
 
-            // Si no existe el archivo, lo crea vacío (SQLite lo inicializa solo)
+         // If the file does not exist, it creates an empty file (SQLite initializes it automatically)
             if (!Files.exists(dbPath)) {
                 Files.createDirectories(dbPath.getParent());
                 Files.createFile(dbPath);
-                //System.out.println("[DB] Archivo .db creado en: " + dbPath);
             }
 
             DB_URL = "jdbc:sqlite:" + dbPath.toAbsolutePath().toString();
-            //System.out.println("[DB] URL: " + DB_URL);
 
         } catch (Exception e) {
-            throw new RuntimeException("[DB] No se pudo preparar la base de datos: " + e.getMessage());
+            throw new RuntimeException("[DB] The database could not be prepared: " + e.getMessage());
         }
     }
 
@@ -50,7 +48,6 @@ public class DatabaseConnection {
     private DatabaseConnection() throws SQLException {
         this.connection = DriverManager.getConnection(DB_URL);
 
-        // Solo inicializa el schema la primera vez en toda la ejecución
         if (!schemaInitialized) {
             initializeSchema();
             schemaInitialized = true;
@@ -58,21 +55,21 @@ public class DatabaseConnection {
     }
 
     /**
-     * Lee schema.sql y ejecuta las sentencias CREATE TABLE IF NOT EXISTS.
+     * Read schema.sql and execute the statements CREATE TABLE .
      */
     private void initializeSchema() {
         URL schemaUrl = DatabaseConnection.class
                 .getClassLoader()
                 .getResource("resources/schema.sql");
 
-        // Si no lo encuentra por classpath, lo busca por ruta directa
+     // If it cannot be found by classpath, it searches by direct path
         if (schemaUrl == null) {
             try {
                 String projectDir = System.getProperty("user.dir");
                 Path schemaPath = Paths.get(projectDir, "src", "resources", "schema.sql");
                 schemaUrl = schemaPath.toUri().toURL();
             } catch (Exception e) {
-                System.err.println("[DB] No se encontró schema.sql: " + e.getMessage());
+                System.err.println("[DB] schema.sql not found: " + e.getMessage());
                 return;
             }
         }
@@ -97,10 +94,10 @@ public class DatabaseConnection {
                     }
                 }
             }
-            System.out.println("[DB] Schema inicializado correctamente.");
+            //System.out.println("[DB] Schema initialized correctly.");
 
         } catch (Exception e) {
-            System.err.println("[DB] Error al inicializar schema: " + e.getMessage());
+            System.err.println("[DB] Error initializing schema: " + e.getMessage());
         }
     }
 
@@ -119,7 +116,7 @@ public class DatabaseConnection {
         try {
             if (connection != null && !connection.isClosed()) connection.close();
         } catch (SQLException e) {
-            System.err.println("[DB] Error al cerrar: " + e.getMessage());
+            System.err.println("[DB] Error closing: " + e.getMessage());
         } finally {
             instance = null;
         }
