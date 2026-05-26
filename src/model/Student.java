@@ -10,17 +10,42 @@ import model.interfaces.Evaluable;
 import model.interfaces.Exportable;
 
 /**
- * Represents a student of the Monster High Institute.
- * Extends {@link Person} and implements {@link Evaluable} and {@link Exportable}.
+ * Represents a student at the Monster High Institute.
+ * <p>
+ * Extends {@link Person} and implements {@link Evaluable}, {@link Exportable}
+ * and {@link Buscable}. It keeps the list of enrollments ({@link Enrollment})
+ * in which the student participates.
+ * </p>
  *
- * @author Fatima
- * @version 1.2
+ * @author Fátima Román
+ * @version 1.3
  */
-public class Student extends Person implements Exportable, Evaluable, Buscable {    private int studentYear;
+public class Student extends Person implements Exportable, Evaluable, Buscable {
+
+    /** Academic year (1 or 2). */
+    private int studentYear;
+
+    /** Identifier of the group the student belongs to (e.g. "1A"). */
     private String groupName;
+
+    /** Monster type assigned to the student; may be {@code null}. */
     private MonsterType monsterType;
+
+    /** List of this student's active enrollments. */
     private List<Enrollment> enrollments;
 
+    /**
+     * Main constructor.
+     *
+     * @param id          unique identifier
+     * @param name        first name
+     * @param surname     surname
+     * @param birthDate   birth date
+     * @param email       email address
+     * @param studentYear academic year (1 or 2)
+     * @param groupName   group name (e.g. "1A")
+     * @param monsterType monster type, or {@code null}
+     */
     public Student(int id, String name, String surname, LocalDate birthDate,
                    String email, int studentYear, String groupName, MonsterType monsterType) {
         super(id, name, surname, birthDate, email);
@@ -30,37 +55,89 @@ public class Student extends Person implements Exportable, Evaluable, Buscable {
         this.enrollments = new ArrayList<>();
     }
 
+    /**
+     * Copy constructor.
+     *
+     * @param copy student to copy
+     */
     public Student(Student copy) {
-        super(copy.id, copy.name, copy.surname, copy.birthDate, copy.email);
+        super(copy.getId(), copy.getName(), copy.getSurname(),
+              copy.getBirthDate(), copy.getEmail());
         this.studentYear = copy.studentYear;
         this.groupName   = copy.groupName;
         this.monsterType = copy.monsterType;
         this.enrollments = new ArrayList<>(copy.enrollments);
     }
 
-    //Getters & setters
-
+    /**
+     * Returns the academic year.
+     *
+     * @return academic year (1 or 2)
+     */
     public int getStudentYear() { return studentYear; }
+
+    /**
+     * Sets the academic year.
+     *
+     * @param y academic year
+     * @throws IllegalArgumentException if it is not 1 or 2
+     */
     public void setStudentYear(int y) {
         if (y < 1 || y > 2)
-            throw new IllegalArgumentException("Student year must be 1 or 2, got: " + y);
+            throw new IllegalArgumentException("The year must be 1 or 2, received: " + y);
         this.studentYear = y;
     }
 
+    /**
+     * Returns the group name.
+     *
+     * @return group name
+     */
+    public String getGroupName() { return groupName; }
+
+    /**
+     * Sets the group name.
+     *
+     * @param g new group name
+     * @throws IllegalArgumentException if it is empty or null
+     */
     public void setGroupName(String g) {
         if (g == null || g.isBlank())
-            throw new IllegalArgumentException("Group name cannot be blank.");
+            throw new IllegalArgumentException("Group name cannot be empty.");
         this.groupName = g;
-    }    
-    public String getGroupName() { return groupName; }
-    public MonsterType getMonsterType() { return monsterType; }
-    public void setMonsterType(MonsterType m) { this.monsterType = m; }
-    public List<Enrollment> getEnrollments() { return enrollments; }
-    public void setEnrollments(List<Enrollment> e) { this.enrollments = e; }
+    }
 
+    /**
+     * Returns the student's monster type.
+     *
+     * @return monster type, or {@code null}
+     */
+    public MonsterType getMonsterType() { return monsterType; }
+
+    /**
+     * Sets the monster type.
+     *
+     * @param m new monster type
+     */
+    public void setMonsterType(MonsterType m) { this.monsterType = m; }
+
+    /**
+     * Returns the student's enrollment list.
+     *
+     * @return enrollment list
+     */
+    public List<Enrollment> getEnrollments() { return enrollments; }
+
+    /**
+     * Replaces the entire enrollment list.
+     *
+     * @param e new enrollment list
+     */
+    public void setEnrollments(List<Enrollment> e) { this.enrollments = e; }
 
     /**
      * Adds an enrollment to this student's list.
+     *
      * @param enrollment the enrollment to add
      */
     public void enrollSubject(Enrollment enrollment) {
@@ -68,17 +145,18 @@ public class Student extends Person implements Exportable, Evaluable, Buscable {
     }
 
     /**
-     * Removes the enrollment for the given subject.
-     * @param subject the subject to unenroll from
+     * Removes the enrollment corresponding to the specified subject.
+     *
+     * @param subject subject from which the student is unenrolled
      */
     public void removeEnrollment(Subject subject) {
         enrollments.removeIf(e -> e.getSubject().equals(subject));
     }
 
-
     /**
-     * Calculates the student's average grade across all enrollments.
-     * @return average of all final grades, or 0.0 if there are no enrollments
+     * Calculates the student's average grade by averaging the final grades of all enrollments.
+     *
+     * @return average grade, or 0.0 if there are no enrollments
      */
     @Override
     public double calculateFinalGrade() {
@@ -88,16 +166,17 @@ public class Student extends Person implements Exportable, Evaluable, Buscable {
     }
 
     /**
-     * Returns whether the student has passed (average grade >= 5).
-     * @return {@code true} if the average grade is 5 or above
+     * Indicates whether the student has passed (average grade &ge; 5).
+     *
+     * @return {@code true} if the average grade is 5 or higher
      */
     @Override
     public boolean hasPassed() { return calculateFinalGrade() >= 5.0; }
 
     /**
-     * Returns a human-readable role description.
+     * Returns a description of this student's role.
      *
-     * @return string with the student's year and group
+     * @return description with year and group
      */
     @Override
     public String getRoleDescription() {
@@ -106,27 +185,28 @@ public class Student extends Person implements Exportable, Evaluable, Buscable {
 
     /**
      * Exports the student as a CSV line.
-     * Fields that may contain commas are wrapped in double quotes.
-     * A {@code null} birthDate is exported as an empty string (not the literal "null").
+     * Fields that may contain commas are enclosed in double quotes.
+     * A {@code null} birthDate is exported as an empty string.
+     *
      * @return CSV line with the student's data
      */
     @Override
     public String toCsv() {
-        // FIX: escape fields that may contain commas; handle null birthDate properly
         int mid = (monsterType != null) ? monsterType.getId() : -1;
-        String bd = (birthDate != null) ? birthDate.toString() : "";
-        return escapeCsv(id)       + "," + escapeCsv(name)      + "," +
-               escapeCsv(surname)  + "," + bd                   + "," +
-               escapeCsv(email)    + "," + studentYear           + "," +
-               escapeCsv(groupName) + "," + mid;
+        String bd = (getBirthDate() != null) ? getBirthDate().toString() : "";
+        return escapeCsv(getId())         + "," + escapeCsv(getName())     + "," +
+               escapeCsv(getSurname())    + "," + bd                       + "," +
+               escapeCsv(getEmail())      + "," + studentYear               + "," +
+               escapeCsv(groupName)       + "," + mid;
     }
 
     /**
      * Escapes a value for CSV format.
-     * Wraps the value in double quotes if it contains commas, quotes, or newlines,
-     * and doubles any internal quote characters.
-     * @param value the object to escape (converted via {@code toString()})
-     * @return a CSV-safe string, or an empty string if {@code value} is {@code null}
+     * Wraps the value in double quotes if it contains commas, quotes or line breaks,
+     * duplicating internal quotes.
+     *
+     * @param value the object to escape (converted with {@code toString()})
+     * @return safe CSV string, or an empty string if {@code value} is {@code null}
      */
     private String escapeCsv(Object value) {
         if (value == null) return "";
@@ -137,40 +217,55 @@ public class Student extends Person implements Exportable, Evaluable, Buscable {
         return s;
     }
 
-
+    /**
+     * Returns a human-readable representation of the student with all fields.
+     *
+     * @return multiline string with the student's data
+     */
     @Override
     public String toString() {
         return  "\n" +
-                " ID:         " + id + "\n" +
-                " Name:       " + name + " " + surname + "\n" +
-                " Birth date: " + (birthDate != null ? birthDate : "N/A") + "\n" +
-                " Email:      " + email + "\n" +
-                " Year/Group: " + studentYear + " / " + groupName + "\n" +
-                " Type:       " + (monsterType != null ? monsterType.getName() : "Unknown") + "\n" +
-                " Avg grade:  " + String.format("%.2f", calculateFinalGrade()) + "\n" +
+                " ID:          " + getId() + "\n" +
+                " Name:        " + getName() + " " + getSurname() + "\n" +
+                " Birth date:  " + (getBirthDate() != null ? getBirthDate() : "N/A") + "\n" +
+                " Email:       " + getEmail() + "\n" +
+                " Year/Group:  " + studentYear + " / " + groupName + "\n" +
+                " Type:        " + (monsterType != null ? monsterType.getName() : "Unknown") + "\n" +
+                " Average:     " + String.format("%.2f", calculateFinalGrade()) + "\n" +
                 "─────────────────────────────────────";
     }
 
     /**
-     * Two students are considered equal if they share the same {@code id}.
+     * Two students are equal if they share the same {@code id}.
+     *
+     * @param o object to compare
+     * @return {@code true} if the ids match
      */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Student)) return false;
-        return id == ((Student) o).id;
+        return getId() == ((Student) o).getId();
     }
 
+    /** {@inheritDoc} */
     @Override
-    public int hashCode() { return Objects.hash(id); }
-    
+    public int hashCode() { return Objects.hash(getId()); }
+
+    /**
+     * Checks whether this student matches the given keyword
+     * by searching in name, surname, email and group (case-insensitive).
+     *
+     * @param keyword search keyword
+     * @return {@code true} if any field contains the keyword
+     */
     @Override
     public boolean matches(String keyword) {
         if (keyword == null) return false;
         String k = keyword.toLowerCase();
-        return name.toLowerCase().contains(k)
-            || surname.toLowerCase().contains(k)
-            || email.toLowerCase().contains(k)
+        return getName().toLowerCase().contains(k)
+            || getSurname().toLowerCase().contains(k)
+            || getEmail().toLowerCase().contains(k)
             || groupName.toLowerCase().contains(k);
     }
 }

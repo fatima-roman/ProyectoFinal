@@ -1,5 +1,6 @@
 package ui;
 
+import exceptions.InvalidMonsterTypeException;
 import exceptions.StudentNotFoundException;
 import model.MonsterType;
 import model.Student;
@@ -13,9 +14,10 @@ import java.util.Scanner;
 
 /**
  * Console submenu for student management.
- * Provides full CRUD operations on {@link Student} entities via {@link StudentService}.
+ * Provides full CRUD operations on {@link Student}
+ * through {@link StudentService}.
  *
- * @author Fatima Roman
+ * @author Fátima Román
  * @version 2.2
  */
 public class MainMenuStudent {
@@ -26,7 +28,7 @@ public class MainMenuStudent {
     /** Service layer for student operations. */
     private static final StudentService studentService = new StudentService();
 
-    /** Service layer for monster type validation. */
+    /** Service layer for resolving monster types. */
     private static final MonsterTypeService monsterTypeService = new MonsterTypeService();
 
     /**
@@ -43,14 +45,14 @@ public class MainMenuStudent {
                 case 3 -> addStudent();
                 case 4 -> updateStudent();
                 case 5 -> deleteStudent();
-                case 0 -> System.out.println("\nReturning to main menu...");
+                case 0 -> System.out.println("\nReturning to the main menu...");
                 default -> System.out.println("Invalid option, please try again.");
             }
         } while (option != 0);
     }
 
     /**
-     * Prints the student submenu options.
+     * Displays the student submenu options.
      */
     private static void printMenu() {
         System.out.println("\n===== STUDENT MANAGEMENT =====");
@@ -64,23 +66,23 @@ public class MainMenuStudent {
     }
 
     /**
-     * Retrieves and prints all students.
+     * Retrieves and prints all registered students.
      */
     private static void listAllStudents() {
         List<Student> students = studentService.findAll();
         if (students.isEmpty()) {
-            System.out.println("No students registered.");
+            System.out.println("There are no registered students.");
             return;
         }
-        System.out.println("\n--- Student List (" + students.size() + " total) ---");
+        System.out.println("\n--- Student list (" + students.size() + " total) ---");
         students.forEach(System.out::println);
     }
 
     /**
-     * Prompts for an ID and prints the matching student.
+     * Requests an ID and displays the corresponding student.
      */
     private static void findStudentById() {
-        System.out.print("Enter student ID: ");
+        System.out.print("Student ID: ");
         int id = MainMenu.readInt();
         try {
             System.out.println("\n" + studentService.findById(id));
@@ -90,47 +92,53 @@ public class MainMenuStudent {
     }
 
     /**
-     * Prompts for all student fields and saves a new student.
+     * Requests all fields and saves a new student.
+     * Resolves the {@link MonsterType} from the database before creating the student.
      */
     private static void addStudent() {
         System.out.println("\n--- Add New Student ---");
-
         System.out.print("Name: ");
         String name = sc.nextLine().trim();
-
         System.out.print("Surname: ");
         String surname = sc.nextLine().trim();
-
         System.out.print("Birth date (YYYY-MM-DD): ");
-        LocalDate birthDate = readDateInPast();  
-
+        LocalDate birthDate = readDate();
         System.out.print("Email: ");
         String email = sc.nextLine().trim();
-
         System.out.print("Year (1 or 2): ");
         int year = readYear();
-
-        System.out.print("Group name (e.g. 1A): ");
+        System.out.print("Group (e.g. 1A): ");
         String groupName = sc.nextLine().trim();
 
-        MonsterType mt = readMonsterType();       
-        if (mt == null) return;                   
+        System.out.println("Available monster types:");
+        monsterTypeService.findAll().forEach(mt ->
+            System.out.println("  " + mt.getId() + " → " + mt.getName())
+        );
+        System.out.print("Monster Type ID: ");
+        int mtId = MainMenu.readInt();
 
-        // ID 0 = AUTOINCREMENT, DB assigns the real id
+        MonsterType mt;
+        try {
+            mt = monsterTypeService.findById(mtId);
+        } catch (InvalidMonsterTypeException e) {
+            System.out.println("Error: " + e.getMessage());
+            return;
+        }
+
         Student newStudent = new Student(0, name, surname, birthDate, email, year, groupName, mt);
         try {
             studentService.save(newStudent);
             System.out.println("Student added successfully!");
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Error while saving the student: " + e.getMessage());
         }
     }
 
     /**
-     * Prompts for an ID, loads the existing record, then allows updating each field.
+     * Requests an ID, loads the existing record and allows modifying each field.
      */
     private static void updateStudent() {
-        System.out.print("\nEnter the ID of the student to update: ");
+        System.out.print("\nStudent ID to update: ");
         int id = MainMenu.readInt();
         Student existing;
         try {
@@ -139,46 +147,37 @@ public class MainMenuStudent {
             System.out.println("Error: " + e.getMessage());
             return;
         }
-
         System.out.println("Editing: " + existing);
-        System.out.println("(Press Enter to keep current value)\n");
+        System.out.println("(Press Enter to keep the current value)\n");
 
         System.out.print("New name [" + existing.getName() + "]: ");
         String name = readOptional(existing.getName());
-
         System.out.print("New surname [" + existing.getSurname() + "]: ");
         String surname = readOptional(existing.getSurname());
-
         System.out.print("New birth date [" + existing.getBirthDate() + "] (YYYY-MM-DD): ");
         String rawDate = sc.nextLine().trim();
         LocalDate birthDate = rawDate.isEmpty()
-                ? existing.getBirthDate()
-                : parseDateInPast(rawDate, existing.getBirthDate()); // FIX: valida en pasado
-
+                ? existing.getBirthDate() : parseDate(rawDate, existing.getBirthDate());
         System.out.print("New email [" + existing.getEmail() + "]: ");
         String email = readOptional(existing.getEmail());
-
         System.out.print("New year [" + existing.getStudentYear() + "]: ");
         String rawYear = sc.nextLine().trim();
-        int year = rawYear.isEmpty() ? existing.getStudentYear() : parseYear(rawYear, existing.getStudentYear());
-
+        int year = rawYear.isEmpty() ? existing.getStudentYear() : parseIntSafe(rawYear, existing.getStudentYear());
         System.out.print("New group [" + existing.getGroupName() + "]: ");
         String groupName = readOptional(existing.getGroupName());
 
         int currentMtId = existing.getMonsterType() != null ? existing.getMonsterType().getId() : 0;
-        System.out.print("New Monster Type ID [" + currentMtId + "] (Enter to keep): ");
+        System.out.print("New Monster Type ID [" + currentMtId + "]: ");
         String rawMtId = sc.nextLine().trim();
+        int mtId = rawMtId.isEmpty() ? currentMtId : parseIntSafe(rawMtId, currentMtId);
 
+        // FIX: resolve the real MonsterType
         MonsterType mt;
-        if (rawMtId.isEmpty()) {
+        try {
+            mt = monsterTypeService.findById(mtId);
+        } catch (InvalidMonsterTypeException e) {
+            System.out.println("Error: " + e.getMessage() + ". The previous type will be kept.");
             mt = existing.getMonsterType();
-        } else {
-            try {
-                mt = monsterTypeService.findById(Integer.parseInt(rawMtId)); // FIX: valida en BD
-            } catch (Exception e) {
-                System.out.println("Error: " + e.getMessage() + " – keeping original Monster Type.");
-                mt = existing.getMonsterType();
-            }
         }
 
         Student updated = new Student(id, name, surname, birthDate, email, year, groupName, mt);
@@ -186,19 +185,19 @@ public class MainMenuStudent {
             studentService.update(updated);
             System.out.println("Student updated successfully!");
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
+            System.out.println("Error while updating: " + e.getMessage());
         }
     }
 
     /**
-     * Prompts for an ID and deletes the student after confirmation.
+     * Requests an ID and deletes the student after confirmation.
      */
     private static void deleteStudent() {
-        System.out.print("\nEnter student ID to delete: ");
+        System.out.print("\nStudent ID to delete: ");
         int id = MainMenu.readInt();
         try {
             Student s = studentService.findById(id);
-            System.out.print("Are you sure you want to delete: "
+            System.out.print("Are you sure you want to delete "
                     + s.getName() + " " + s.getSurname() + "? (y/n): ");
             if (!sc.nextLine().trim().equalsIgnoreCase("y")) {
                 System.out.println("Deletion cancelled.");
@@ -211,109 +210,68 @@ public class MainMenuStudent {
         }
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────
+    // ── Helper reading methods ───────────────────────────────────────────
 
     /**
-     * Reads a valid ISO date in the past, re-prompting until the date
-     * is both parseable and strictly before today.
+     * Reads a valid ISO date, repeating if the input is invalid.
      *
-     * @return parsed {@link LocalDate} that is before {@link LocalDate#now()}
+     * @return parsed {@link LocalDate}
      */
-    private static LocalDate readDateInPast() {
+    private static LocalDate readDate() {
         while (true) {
-            try {
-                LocalDate date = LocalDate.parse(sc.nextLine().trim());
-                if (date.isBefore(LocalDate.now())) {
-                    return date;
-                }
-                System.out.print("La fecha debe ser anterior a hoy. Introduce otra (YYYY-MM-DD): ");
-            } catch (DateTimeParseException e) {
-                System.out.print("Formato inválido, usa YYYY-MM-DD: ");
+            try { return LocalDate.parse(sc.nextLine().trim()); }
+            catch (DateTimeParseException e) {
+                System.out.print("Invalid date, use the format YYYY-MM-DD: ");
             }
         }
     }
 
     /**
-     * Parses a date string and validates it is in the past.
-     * Returns {@code defaultValue} if parsing fails or the date is not in the past.
+     * Attempts to parse a date; returns {@code defaultValue} if it fails.
      *
-     * @param raw          the raw date string
+     * @param raw          date string
      * @param defaultValue fallback date
-     * @return parsed date (if valid and in the past) or {@code defaultValue}
+     * @return parsed date or {@code defaultValue}
      */
-    private static LocalDate parseDateInPast(String raw, LocalDate defaultValue) {
-        try {
-            LocalDate date = LocalDate.parse(raw);
-            if (date.isBefore(LocalDate.now())) {
-                return date;
-            }
-            System.out.println("La fecha debe ser anterior a hoy. Se mantiene la original.");
-            return defaultValue;
-        } catch (DateTimeParseException e) {
-            System.out.println("Formato inválido. Se mantiene la fecha original.");
+    private static LocalDate parseDate(String raw, LocalDate defaultValue) {
+        try { return LocalDate.parse(raw); }
+        catch (DateTimeParseException e) {
+            System.out.println("Invalid date, the original one will be kept.");
             return defaultValue;
         }
     }
 
     /**
-     * Reads a valid Monster Type ID and fetches it from the database,
-     * re-prompting until the ID actually exists.
+     * Reads a valid year (1 or 2), repeating until a correct value is obtained.
      *
-     * @return the {@link MonsterType} found in the database, or {@code null} on unexpected error
-     */
-    private static MonsterType readMonsterType() {
-        System.out.print("Monster Type ID (1=Vampire 2=Werewolf 3=Zombie 4=Witch 5=Mummy): ");
-        while (true) {
-            try {
-                int mtId = Integer.parseInt(sc.nextLine().trim());
-                MonsterType mt = monsterTypeService.findById(mtId); // lanza excepción si no existe
-                return mt;
-            } catch (NumberFormatException e) {
-                System.out.print("Introduce un número válido: ");
-            } catch (Exception e) {
-                System.out.print("Error: " + e.getMessage() + ". Introduce otro ID: ");
-            }
-        }
-    }
-
-    /**
-     * Reads a year value (1 or 2), re-prompting until valid.
-     *
-     * @return valid year value
+     * @return valid year
      */
     private static int readYear() {
         while (true) {
             try {
                 int y = Integer.parseInt(sc.nextLine().trim());
                 if (y == 1 || y == 2) return y;
-                System.out.print("El año debe ser 1 o 2: ");
+                System.out.print("The year must be 1 or 2: ");
             } catch (NumberFormatException e) {
-                System.out.print("Introduce un número válido: ");
+                System.out.print("Please enter a valid number: ");
             }
         }
     }
 
     /**
-     * Parses a year string (1 or 2). Returns {@code defaultValue} if invalid.
+     * Attempts to parse an integer; returns {@code defaultValue} if it fails.
      *
-     * @param raw          raw input string
-     * @param defaultValue fallback year
-     * @return parsed year if valid, otherwise {@code defaultValue}
+     * @param raw          number string
+     * @param defaultValue fallback value
+     * @return parsed integer or {@code defaultValue}
      */
-    private static int parseYear(String raw, int defaultValue) {
-        try {
-            int y = Integer.parseInt(raw);
-            if (y == 1 || y == 2) return y;
-            System.out.println("El año debe ser 1 o 2. Se mantiene el original.");
-            return defaultValue;
-        } catch (NumberFormatException e) {
-            System.out.println("Número inválido. Se mantiene el año original.");
-            return defaultValue;
-        }
+    private static int parseIntSafe(String raw, int defaultValue) {
+        try { return Integer.parseInt(raw.trim()); }
+        catch (NumberFormatException e) { return defaultValue; }
     }
 
     /**
-     * Returns {@code defaultValue} if the user presses Enter without input.
+     * Returns {@code defaultValue} if the user presses Enter without typing anything.
      *
      * @param defaultValue fallback value
      * @return user input or {@code defaultValue}

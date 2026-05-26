@@ -1,4 +1,6 @@
 name,description,weakness,terrorLevel
+Vampire,Blood-drinking immortal creature of the night,Sunlight,9
+Werewolf,Human who transforms under a full moon,Silver,8
 Sea Monster,Oceanic creature from deep waters,Dehydration,8
 Gorgon,Serpentine monster with petrifying stare,Mirrors,9
 Mummy,Ancient wrapped undead guardian,Fire,7

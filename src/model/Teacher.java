@@ -9,14 +9,17 @@ import model.interfaces.Buscable;
 import model.interfaces.Exportable;
 
 /**
- * Represents a teacher at Monster High Institute.
- * Extends {@link Person} and implements {@link Exportable}.
+ * Represents a teacher at the Monster High Institute.
+ * <p>
+ * Extends {@link Person} and implements {@link Exportable} and {@link Buscable}.
+ * It maintains the list of subjects assigned to this teacher.
+ * </p>
  *
- * @author Fatima Roman
- * @version 1.1
+ * @author Fátima Román
+ * @version 1.2
  */
 public class Teacher extends Person implements Exportable, Buscable {
-	
+
     /** Teaching specialty of this teacher. */
     private String specialty;
 
@@ -24,12 +27,12 @@ public class Teacher extends Person implements Exportable, Buscable {
     private List<Subject> subjects;
 
     /**
-     * Constructs a Teacher with all fields.
+     * Full constructor.
      *
      * @param id        unique identifier
      * @param name      first name
-     * @param surname   last name
-     * @param birthDate date of birth
+     * @param surname   surname
+     * @param birthDate birth date
      * @param email     email address
      * @param specialty teaching specialty
      */
@@ -41,9 +44,21 @@ public class Teacher extends Person implements Exportable, Buscable {
     }
 
     /**
+     * Copy constructor.
+     *
+     * @param copy teacher to copy
+     */
+    public Teacher(Teacher copy) {
+        super(copy.getId(), copy.getName(), copy.getSurname(),
+              copy.getBirthDate(), copy.getEmail());
+        this.specialty = copy.specialty;
+        this.subjects  = new ArrayList<>(copy.subjects);
+    }
+
+    /**
      * Returns the teaching specialty.
      *
-     * @return specialty string
+     * @return specialty
      */
     public String getSpecialty() { return specialty; }
 
@@ -57,19 +72,19 @@ public class Teacher extends Person implements Exportable, Buscable {
     /**
      * Returns the list of subjects assigned to this teacher.
      *
-     * @return list of subjects
+     * @return subject list
      */
     public List<Subject> getSubjects() { return subjects; }
 
     /**
-     * Sets the full list of subjects.
+     * Replaces the entire subject list.
      *
      * @param s new subject list
      */
     public void setSubjects(List<Subject> s) { this.subjects = s; }
 
     /**
-     * Assigns a subject to this teacher if not already assigned.
+     * Assigns a subject to this teacher if it is not already assigned.
      *
      * @param s subject to assign
      */
@@ -78,16 +93,16 @@ public class Teacher extends Person implements Exportable, Buscable {
     }
 
     /**
-     * Removes a subject from this teacher's list.
+     * Removes the specified subject from this teacher's list.
      *
      * @param s subject to remove
      */
     public void unassignSubject(Subject s) { subjects.remove(s); }
 
     /**
-     * Returns a human-readable role description for this teacher.
+     * Returns a description of this teacher's role.
      *
-     * @return role description including specialty
+     * @return description including the specialty
      */
     @Override
     public String getRoleDescription() { return "Teacher - Specialty: " + specialty; }
@@ -99,7 +114,8 @@ public class Teacher extends Person implements Exportable, Buscable {
      */
     @Override
     public String toCsv() {
-        return id + "," + name + "," + surname + "," + birthDate + "," + email + "," + specialty;
+        return getId() + "," + getName() + "," + getSurname() + ","
+             + getBirthDate() + "," + getEmail() + "," + specialty;
     }
 
     /**
@@ -109,34 +125,40 @@ public class Teacher extends Person implements Exportable, Buscable {
      */
     @Override
     public String toString() {
-        return "Teacher[id=" + id + ", name=" + name + " " + surname + ", specialty=" + specialty + "]";
+        return "Teacher[id=" + getId() + ", name=" + getName() + " " + getSurname()
+             + ", specialty=" + specialty + "]";
     }
 
     /**
      * Two teachers are equal if they share the same {@code id}.
      *
      * @param o object to compare
-     * @return {@code true} if ids match
+     * @return {@code true} if the ids match
      */
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (!(o instanceof Teacher)) return false;
-        return id == ((Teacher) o).id;
+        return getId() == ((Teacher) o).getId();
     }
 
     /** {@inheritDoc} */
     @Override
-    public int hashCode() { return Objects.hash(id); }
-    
-    /**	{@inheritDoc}
+    public int hashCode() { return Objects.hash(getId()); }
+
+    /**
+     * Checks whether this teacher matches the given keyword by searching
+     * in name, surname and specialty (case-insensitive).
+     *
+     * @param keyword search keyword
+     * @return {@code true} if any field contains the keyword
      */
     @Override
     public boolean matches(String keyword) {
         if (keyword == null) return false;
         String k = keyword.toLowerCase();
-        return name.toLowerCase().contains(k)
-            || surname.toLowerCase().contains(k)
+        return getName().toLowerCase().contains(k)
+            || getSurname().toLowerCase().contains(k)
             || specialty.toLowerCase().contains(k);
     }
 }

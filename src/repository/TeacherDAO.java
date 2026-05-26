@@ -5,21 +5,24 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import exceptions.DatabaseException;
 import model.Teacher;
 import util.DatabaseConnection;
 
 /**
- * DAO for Teacher persistence using JDBC + SQLite.
+ * DAO for the persistence of {@link Teacher} using JDBC + SQLite.
+ * Extends {@link GenericRepositoryBD} to fulfill the generic repository requirement.
  *
- * @author Fatima R
- * @version 1.0
+ * @author Fátima Román
+ * @version 1.2
  */
 public class TeacherDAO extends GenericRepositoryBD<Teacher> {
 
     /**
-     * Inserts a new Teacher record into the database.
+     * Inserts a new {@link Teacher} record into the database.
      *
-     * @param t the Teacher to save
+     * @param t the teacher to persist; must not be {@code null}
+     * @throws DatabaseException if an SQL error occurs during insertion
      */
     @Override
     public void save(Teacher t) {
@@ -34,14 +37,15 @@ public class TeacherDAO extends GenericRepositoryBD<Teacher> {
             ps.setString(5, t.getSpecialty());
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("[TeacherDAO.save] " + e.getMessage());
+            throw new DatabaseException("[TeacherDAO.save] " + e.getMessage(), e);
         }
     }
 
     /**
-     * Updates an existing Teacher record in the database.
+     * Updates an existing {@link Teacher} record in the database.
      *
-     * @param t the Teacher with updated data
+     * @param t the teacher with updated values; must not be {@code null}
+     * @throws DatabaseException if an SQL error occurs during the update
      */
     @Override
     public void update(Teacher t) {
@@ -57,14 +61,15 @@ public class TeacherDAO extends GenericRepositoryBD<Teacher> {
             ps.setInt(6, t.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("[TeacherDAO.update] " + e.getMessage());
+            throw new DatabaseException("[TeacherDAO.update] " + e.getMessage(), e);
         }
     }
 
     /**
-     * Deletes the Teacher with the given ID.
+     * Deletes the {@link Teacher} with the given ID from the database.
      *
-     * @param id the ID of the Teacher to delete
+     * @param id the identifier of the teacher to delete
+     * @throws DatabaseException if an SQL error occurs during deletion
      */
     @Override
     public void deleteById(int id) {
@@ -74,15 +79,16 @@ public class TeacherDAO extends GenericRepositoryBD<Teacher> {
             ps.setInt(1, id);
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("[TeacherDAO.deleteById] " + e.getMessage());
+            throw new DatabaseException("[TeacherDAO.deleteById] " + e.getMessage(), e);
         }
     }
 
     /**
-     * Retrieves a Teacher by its ID.
+     * Retrieves a {@link Teacher} by its primary key.
      *
-     * @param id the ID to search for
-     * @return the found Teacher, or {@code null} if not present
+     * @param id the identifier to search for
+     * @return the teacher found, or {@code null} if it does not exist
+     * @throws DatabaseException if an SQL error occurs during the query
      */
     @Override
     public Teacher findById(int id) {
@@ -94,15 +100,16 @@ public class TeacherDAO extends GenericRepositoryBD<Teacher> {
                 if (rs.next()) return mapRow(rs);
             }
         } catch (SQLException e) {
-            System.err.println("[TeacherDAO.findById] " + e.getMessage());
+            throw new DatabaseException("[TeacherDAO.findById] " + e.getMessage(), e);
         }
         return null;
     }
 
     /**
-     * Retrieves all Teacher records from the database.
+     * Retrieves all {@link Teacher} records from the database.
      *
-     * @return list of all teachers
+     * @return list of all teachers (may be empty, never {@code null})
+     * @throws DatabaseException if an SQL error occurs during the query
      */
     @Override
     public List<Teacher> findAll() {
@@ -113,7 +120,7 @@ public class TeacherDAO extends GenericRepositoryBD<Teacher> {
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) list.add(mapRow(rs));
         } catch (SQLException e) {
-            System.err.println("[TeacherDAO.findAll] " + e.getMessage());
+            throw new DatabaseException("[TeacherDAO.findAll] " + e.getMessage(), e);
         }
         return list;
     }
@@ -121,8 +128,8 @@ public class TeacherDAO extends GenericRepositoryBD<Teacher> {
     /**
      * Maps a {@link ResultSet} row to a {@link Teacher} object.
      *
-     * @param rs the current ResultSet row
-     * @return populated Teacher instance
+     * @param rs the current ResultSet row; must not be {@code null}
+     * @return populated {@link Teacher} instance
      * @throws SQLException if any column cannot be read
      */
     private Teacher mapRow(ResultSet rs) throws SQLException {

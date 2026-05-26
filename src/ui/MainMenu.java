@@ -2,30 +2,43 @@ package ui;
 
 import java.util.Scanner;
 
+import repository.MonsterTypeDAO;
 import util.CsvUtil;
 
 /**
- * Application entry point and main console menu for Monster High Institute Manager.
- * Delegates to entity-specific submenus for each management area.
+ * Entry point and main console menu of the Monster High Institute Manager.
+ * <p>
+ * On startup, it loads the initial data from CSV only if the database
+ * is empty, avoiding duplicates in successive runs. On exit, it persists
+ * the current state back to the CSV files.
+ * </p>
  *
- * @author Fatima Roman
- * @version 1.0
+ * @author Fátima Román
+ * @version 1.1
  */
 public class MainMenu {
 
-    /** Shared scanner for console input. */
+    /** Shared scanner for the entire console interface. */
     private static final Scanner sc = new Scanner(System.in);
 
     /**
      * Application entry point.
+     * <p>
+     * Imports the initial data from CSV only if the database is empty,
+     * then displays the main menu in a loop until the user chooses to exit.
+     * On exit, it automatically saves the state to the CSV files.
+     * </p>
      *
-     * @param args command-line arguments (not used)
+     * @param args command-line arguments (unused)
      */
     public static void main(String[] args) {
-        CsvUtil.importMonsterTypes();
-        CsvUtil.importTeachers();
-        CsvUtil.importStudents();
-        CsvUtil.importSubjects();
+        MonsterTypeDAO mtDao = new MonsterTypeDAO();
+        if (mtDao.findAll().isEmpty()) {
+            CsvUtil.importMonsterTypes();
+            CsvUtil.importTeachers();
+            CsvUtil.importStudents();
+            CsvUtil.importSubjects();
+        }
 
         int option;
         do {
@@ -41,11 +54,11 @@ public class MainMenu {
                 case 7 -> MainMenuMonsterType.start();
                 case 8 -> MainMenuImportExport.start();
                 case 0 -> {
-                    System.out.println("Saving data in CSV format...");
+                    System.out.println("\nSaving data to CSV...");
                     CsvUtil.updateStudents();
                     CsvUtil.updateSubjects();
                     CsvUtil.updateTeachers();
-                    System.out.println("\nByee! 🖤");
+                    System.out.println("\nSee you later! 🖤");
                 }
                 default -> System.out.println("Invalid option, please try again.");
             }
@@ -54,7 +67,7 @@ public class MainMenu {
     }
 
     /**
-     * Prints the main menu to the console.
+     * Displays the main menu in the console.
      */
     private static void printMenu() {
         System.out.println("\n╔══════════════════════════════════╗");
@@ -65,7 +78,7 @@ public class MainMenu {
         System.out.println("3. Subject Management");
         System.out.println("4. Enrollment Management");
         System.out.println("5. Grade Management");
-        System.out.println("6. Reports & Statistics");
+        System.out.println("6. Reports and Statistics");
         System.out.println("7. Monster Type Catalog");
         System.out.println("8. Import / Export Data");
         System.out.println("0. Exit");
@@ -73,7 +86,7 @@ public class MainMenu {
     }
 
     /**
-     * Reads a valid integer from the console, re-prompting on invalid input.
+     * Reads a valid integer from the console, repeating the prompt if the input is invalid.
      *
      * @return the integer entered by the user
      */
@@ -88,9 +101,9 @@ public class MainMenu {
     }
 
     /**
-     * Returns the shared scanner instance.
+     * Returns the shared {@link Scanner}.
      *
-     * @return shared {@link Scanner}
+     * @return shared scanner instance
      */
     static Scanner getScanner() { return sc; }
 }
