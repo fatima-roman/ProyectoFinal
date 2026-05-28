@@ -16,7 +16,6 @@ public abstract class GenericRepositoryBD<T extends Identifiable> {
 
     /**
      * Persists a new entity to the database.
-     *
      * @param entity the entity to save; must not be {@code null}
      */
     public abstract void save(T entity);
@@ -29,8 +28,6 @@ public abstract class GenericRepositoryBD<T extends Identifiable> {
     public abstract void update(T entity);
 
     /**
-     * Deletes the entity with the given ID from the database.
-     *
      * @param id the identifier of the entity to delete
      */
     public abstract void deleteById(int id);

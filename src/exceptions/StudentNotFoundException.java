@@ -17,12 +17,5 @@ public class StudentNotFoundException extends Exception {
         super("Student with ID " + id + " was not found in the system.");
     }
 
-    /**
-     * Constructs the exception with a custom message.
-     *
-     * @param message the detail message
-     */
-    public StudentNotFoundException(String message) {
-        super(message);
-    }
+    
 }

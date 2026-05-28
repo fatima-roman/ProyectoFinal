@@ -19,12 +19,4 @@ public class DatabaseException extends RuntimeException {
         super(message, cause);
     }
 
-    /**
-     * Constructs the exception with a message only.
-     *
-     * @param message human-readable description of the failure
-     */
-    public DatabaseException(String message) {
-        super(message);
-    }
 }

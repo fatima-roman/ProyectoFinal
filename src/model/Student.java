@@ -22,30 +22,11 @@ import model.interfaces.Exportable;
  */
 public class Student extends Person implements Exportable, Evaluable, Buscable {
 
-    /** Academic year (1 or 2). */
     private int studentYear;
-
-    /** Identifier of the group the student belongs to (e.g. "1A"). */
     private String groupName;
-
-    /** Monster type assigned to the student; may be {@code null}. */
     private MonsterType monsterType;
-
-    /** List of this student's active enrollments. */
     private List<Enrollment> enrollments;
 
-    /**
-     * Main constructor.
-     *
-     * @param id          unique identifier
-     * @param name        first name
-     * @param surname     surname
-     * @param birthDate   birth date
-     * @param email       email address
-     * @param studentYear academic year (1 or 2)
-     * @param groupName   group name (e.g. "1A")
-     * @param monsterType monster type, or {@code null}
-     */
     public Student(int id, String name, String surname, LocalDate birthDate,
                    String email, int studentYear, String groupName, MonsterType monsterType) {
         super(id, name, surname, birthDate, email);
@@ -55,27 +36,8 @@ public class Student extends Person implements Exportable, Evaluable, Buscable {
         this.enrollments = new ArrayList<>();
     }
 
-    /**
-     * Copy constructor.
-     *
-     * @param copy student to copy
-     */
-    public Student(Student copy) {
-        super(copy.getId(), copy.getName(), copy.getSurname(),
-              copy.getBirthDate(), copy.getEmail());
-        this.studentYear = copy.studentYear;
-        this.groupName   = copy.groupName;
-        this.monsterType = copy.monsterType;
-        this.enrollments = new ArrayList<>(copy.enrollments);
-    }
 
-    /**
-     * Returns the academic year.
-     *
-     * @return academic year (1 or 2)
-     */
     public int getStudentYear() { return studentYear; }
-
     /**
      * Sets the academic year.
      *
@@ -88,11 +50,6 @@ public class Student extends Person implements Exportable, Evaluable, Buscable {
         this.studentYear = y;
     }
 
-    /**
-     * Returns the group name.
-     *
-     * @return group name
-     */
     public String getGroupName() { return groupName; }
 
     /**
@@ -106,33 +63,9 @@ public class Student extends Person implements Exportable, Evaluable, Buscable {
             throw new IllegalArgumentException("Group name cannot be empty.");
         this.groupName = g;
     }
-
-    /**
-     * Returns the student's monster type.
-     *
-     * @return monster type, or {@code null}
-     */
     public MonsterType getMonsterType() { return monsterType; }
-
-    /**
-     * Sets the monster type.
-     *
-     * @param m new monster type
-     */
     public void setMonsterType(MonsterType m) { this.monsterType = m; }
-
-    /**
-     * Returns the student's enrollment list.
-     *
-     * @return enrollment list
-     */
     public List<Enrollment> getEnrollments() { return enrollments; }
-
-    /**
-     * Replaces the entire enrollment list.
-     *
-     * @param e new enrollment list
-     */
     public void setEnrollments(List<Enrollment> e) { this.enrollments = e; }
 
     /**

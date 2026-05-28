@@ -29,8 +29,6 @@ public class TeacherService {
     /** DAO used to interact with the SUBJECT table when assigning subjects. */
     private final SubjectDAO subjectDAO = new SubjectDAO();
 
-    // ── CRUD ──────────────────────────────────────────────────────────────
-
     /**
      * Returns all registered teachers.
      *
@@ -88,8 +86,6 @@ public class TeacherService {
         teacherDAO.deleteById(id);
     }
 
-    // ── Subject assignment ────────────────────────────────────────────────
-
     /**
      * Assigns a subject to a teacher.
      *
@@ -127,8 +123,6 @@ public class TeacherService {
         teacherDAO.update(t);
         subjectDAO.update(s);
     }
-
-    // ── Stream operations ─────────────────────────────────────────────────
 
     /**
      * Returns all teachers sorted by surname.
@@ -183,8 +177,6 @@ public class TeacherService {
         return teacherDAO.findAll().stream()
                 .collect(Collectors.groupingBy(Teacher::getSpecialty));
     }
-
-    // ── Validation ────────────────────────────────────────────────────────
 
     /**
      * Validates that all required teacher fields are non-blank.

@@ -17,12 +17,5 @@ public class TeacherNotFoundException extends Exception {
         super("Teacher with ID " + id + " was not found in the system.");
     }
 
-    /**
-     * Constructs the exception with a custom message.
-     *
-     * @param message the detail message
-     */
-    public TeacherNotFoundException(String message) {
-        super(message);
-    }
+
 }

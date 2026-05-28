@@ -17,12 +17,5 @@ public class SubjectNotFoundException extends Exception {
         super("Subject with ID " + id + " was not found in the system.");
     }
 
-    /**
-     * Constructs the exception with a custom message.
-     *
-     * @param message the detail message
-     */
-    public SubjectNotFoundException(String message) {
-        super(message);
-    }
+
 }

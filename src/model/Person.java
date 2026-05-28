@@ -16,30 +16,12 @@ import model.interfaces.Identifiable;
  */
 public abstract class Person implements Identifiable {
 
-    /** Unique identifier of the person. */
     private int id;
-
-    /** First name. */
     private String name;
-
-    /** Surname. */
     private String surname;
-
-    /** Birth date; may be {@code null}. */
     private LocalDate birthDate;
-
-    /** Email address. */
     private String email;
 
-    /**
-     * Full constructor.
-     *
-     * @param id        unique identifier
-     * @param name      first name
-     * @param surname   surname
-     * @param birthDate birth date
-     * @param email     email address (must contain '@')
-     */
     public Person(int id, String name, String surname, LocalDate birthDate, String email) {
         this.id        = id;
         this.name      = name;
@@ -48,70 +30,18 @@ public abstract class Person implements Identifiable {
         this.email     = email;
     }
 
-    /**
-     * Returns a description of the role this person plays in the institute.
-     *
-     * @return descriptive string of the role
-     */
     public abstract String getRoleDescription();
-
-    /** {@inheritDoc} */
     @Override
     public int getId() { return id; }
-
-    /** {@inheritDoc} */
     @Override
     public void setId(int id) { this.id = id; }
-
-    /**
-     * Returns the first name.
-     *
-     * @return first name
-     */
     public String getName() { return name; }
-
-    /**
-     * Sets the first name.
-     *
-     * @param name new name
-     */
     public void setName(String name) { this.name = name; }
-
-    /**
-     * Returns the surname.
-     *
-     * @return surname
-     */
     public String getSurname() { return surname; }
-
-    /**
-     * Sets the surname.
-     *
-     * @param surname new surname
-     */
     public void setSurname(String surname) { this.surname = surname; }
-
-    /**
-     * Returns the birth date.
-     *
-     * @return birth date, or {@code null} if it is not registered
-     */
     public LocalDate getBirthDate() { return birthDate; }
-
-    /**
-     * Sets the birth date.
-     *
-     * @param birthDate new birth date
-     */
     public void setBirthDate(LocalDate birthDate) { this.birthDate = birthDate; }
-
-    /**
-     * Returns the email.
-     *
-     * @return email
-     */
     public String getEmail() { return email; }
-
     /**
      * Sets the email, validating that it contains '@'.
      *

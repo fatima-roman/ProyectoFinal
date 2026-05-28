@@ -53,6 +53,8 @@ public class MainMenu {
                 case 6 -> MainMenuReports.start();
                 case 7 -> MainMenuMonsterType.start();
                 case 8 -> MainMenuImportExport.start();
+                case 9 -> javafx.application.Application.launch(
+                        ui.javafx.MonsterHighApp.class);
                 case 0 -> {
                     System.out.println("\nSaving data to CSV...");
                     CsvUtil.updateStudents();
@@ -80,7 +82,8 @@ public class MainMenu {
         System.out.println("5. Grade Management");
         System.out.println("6. Reports and Statistics");
         System.out.println("7. Monster Type Catalog");
-        System.out.println("8. Import / Export Data");
+        System.out.println("8. Export Data");
+        System.out.println("9. Start javafx");
         System.out.println("0. Exit");
         System.out.print("Choose an option: ");
     }

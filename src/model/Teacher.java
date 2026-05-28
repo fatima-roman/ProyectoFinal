@@ -20,22 +20,9 @@ import model.interfaces.Exportable;
  */
 public class Teacher extends Person implements Exportable, Buscable {
 
-    /** Teaching specialty of this teacher. */
     private String specialty;
-
-    /** Subjects assigned to this teacher. */
     private List<Subject> subjects;
 
-    /**
-     * Full constructor.
-     *
-     * @param id        unique identifier
-     * @param name      first name
-     * @param surname   surname
-     * @param birthDate birth date
-     * @param email     email address
-     * @param specialty teaching specialty
-     */
     public Teacher(int id, String name, String surname, LocalDate birthDate,
                    String email, String specialty) {
         super(id, name, surname, birthDate, email);
@@ -43,44 +30,9 @@ public class Teacher extends Person implements Exportable, Buscable {
         this.subjects = new ArrayList<>();
     }
 
-    /**
-     * Copy constructor.
-     *
-     * @param copy teacher to copy
-     */
-    public Teacher(Teacher copy) {
-        super(copy.getId(), copy.getName(), copy.getSurname(),
-              copy.getBirthDate(), copy.getEmail());
-        this.specialty = copy.specialty;
-        this.subjects  = new ArrayList<>(copy.subjects);
-    }
-
-    /**
-     * Returns the teaching specialty.
-     *
-     * @return specialty
-     */
     public String getSpecialty() { return specialty; }
-
-    /**
-     * Sets the teaching specialty.
-     *
-     * @param s new specialty
-     */
     public void setSpecialty(String s) { this.specialty = s; }
-
-    /**
-     * Returns the list of subjects assigned to this teacher.
-     *
-     * @return subject list
-     */
     public List<Subject> getSubjects() { return subjects; }
-
-    /**
-     * Replaces the entire subject list.
-     *
-     * @param s new subject list
-     */
     public void setSubjects(List<Subject> s) { this.subjects = s; }
 
     /**

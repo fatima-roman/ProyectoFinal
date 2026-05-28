@@ -19,16 +19,12 @@ public class Enrollment implements Identifiable, Evaluable, Exportable {
     private double grade1;
     private double grade2;
 
-    // FIX: removed the 'finalGrade' field to prevent stale/desynchronised values.
-    // The final grade is always computed on the fly via calculateFinalGrade().
-
     public Enrollment(int id, Student student, Subject subject, double grade1, double grade2) {
         this.id      = id;
         this.student = student;
         this.subject = subject;
         this.grade1  = grade1;
         this.grade2  = grade2;
-        // finalGrade is no longer stored; getFinalGrade() computes it at call time
     }
 
     @Override public int getId() { return id; }

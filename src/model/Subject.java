@@ -14,26 +14,12 @@ import model.interfaces.Identifiable;
  */
 public class Subject implements Identifiable, Exportable {
 
-    /** Unique identifier of the subject. */
     private int id;
-
-    /** Name of the subject (e.g. "Dark Arts 101"). */
     private String name;
-
-    /** Course year this subject belongs to (1 or 2). */
     private int course;
-
-    /** Teacher assigned to this subject; may be {@code null}. */
     private Teacher teacher;
 
-    /**
-     * Constructs a Subject with all fields.
-     *
-     * @param id      unique identifier
-     * @param name    subject name
-     * @param course  course year (1 or 2)
-     * @param teacher assigned teacher, or {@code null}
-     */
+
     public Subject(int id, String name, int course, Teacher teacher) {
         this.id = id;
         this.name = name;
@@ -41,54 +27,15 @@ public class Subject implements Identifiable, Exportable {
         this.teacher = teacher;
     }
 
-    /** {@inheritDoc} */
     @Override
     public int getId() { return id; }
-
-    /** {@inheritDoc} */
     @Override
     public void setId(int id) { this.id = id; }
-
-    /**
-     * Returns the subject name.
-     *
-     * @return subject name
-     */
     public String getName() { return name; }
-
-    /**
-     * Sets the subject name.
-     *
-     * @param name new name
-     */
     public void setName(String name) { this.name = name; }
-
-    /**
-     * Returns the course year.
-     *
-     * @return course year
-     */
     public int getCourse() { return course; }
-
-    /**
-     * Sets the course year.
-     *
-     * @param course new course year
-     */
     public void setCourse(int course) { this.course = course; }
-
-    /**
-     * Returns the teacher assigned to this subject.
-     *
-     * @return assigned teacher, or {@code null}
-     */
     public Teacher getTeacher() { return teacher; }
-
-    /**
-     * Sets the teacher for this subject.
-     *
-     * @param t new teacher
-     */
     public void setTeacher(Teacher t) { this.teacher = t; }
 
     /**

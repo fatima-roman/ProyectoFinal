@@ -13,30 +13,12 @@ import model.interfaces.Identifiable;
  */
 public class MonsterType implements Identifiable, Exportable {
 
-    /** Unique identifier. */
     private int id;
-
-    /** Name of the monster type. */
     private String name;
-
-    /** Short description of the monster type. */
     private String description;
-
-    /** Main weakness of the monster type. */
     private String weakness;
-
-    /** Terror level on a 1–10 scale. */
     private int terrorLevel;
 
-    /**
-     * Full constructor.
-     *
-     * @param id          unique identifier
-     * @param name        type name
-     * @param description short description
-     * @param weakness    main weakness
-     * @param terrorLevel terror level (1-10)
-     */
     public MonsterType(int id, String name, String description, String weakness, int terrorLevel) {
         this.id          = id;
         this.name        = name;
@@ -45,68 +27,16 @@ public class MonsterType implements Identifiable, Exportable {
         this.terrorLevel = terrorLevel;
     }
 
-    /**
-     * Copy constructor.
-     *
-     * @param other monster type to copy
-     */
-    public MonsterType(MonsterType other) {
-        this(other.id, other.name, other.description, other.weakness, other.terrorLevel);
-    }
-
-    /** {@inheritDoc} */
-    @Override public int getId()              { return id; }
-
-    /** {@inheritDoc} */
-    @Override public void setId(int id)       { this.id = id; }
-
-    /**
-     * Returns the type name.
-     * @return name
-     */
-    public String getName()                   { return name; }
-
-    /**
-     * Sets the type name.
-     * @param name new name
-     */
-    public void setName(String name)          { this.name = name; }
-
-    /**
-     * Returns the description.
-     * @return description
-     */
-    public String getDescription()            { return description; }
-
-    /**
-     * Sets the description.
-     * @param d new description
-     */
-    public void setDescription(String d)      { this.description = d; }
-
-    /**
-     * Returns the weakness.
-     * @return weakness
-     */
-    public String getWeakness()               { return weakness; }
-
-    /**
-     * Sets the weakness.
-     * @param w new weakness
-     */
-    public void setWeakness(String w)         { this.weakness = w; }
-
-    /**
-     * Returns the terror level.
-     * @return terror level (1-10)
-     */
-    public int getTerrorLevel()               { return terrorLevel; }
-
-    /**
-     * Sets the terror level.
-     * @param lvl new level (1-10)
-     */
-    public void setTerrorLevel(int lvl)       { this.terrorLevel = lvl; }
+    @Override public int getId(){ return id; }
+    @Override public void setId(int id){ this.id = id; }
+    public String getName(){ return name; }
+    public void setName(String name){ this.name = name; }
+    public String getDescription(){ return description; }
+    public void setDescription(String d){ this.description = d; }
+    public String getWeakness(){ return weakness; }
+    public void setWeakness(String w){ this.weakness = w; }
+    public int getTerrorLevel(){ return terrorLevel; }
+    public void setTerrorLevel(int lvl){ this.terrorLevel = lvl; }
 
     /**
      * Exports this monster type as a CSV line: id,name,description,weakness,terrorLevel.

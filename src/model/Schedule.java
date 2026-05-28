@@ -11,45 +11,19 @@ import model.interfaces.Exportable;
  */
 public class Schedule implements Identifiable, Exportable {
 
-    /** Unique identifier. */
     private int id;
-    /** Subject for this session. */
     private Subject subject;
-    /** Group attending this session. */
     private MonsterHighGroup group;
-    /** Day of the week (e.g. "Monday"). */
     private String dayOfWeek;
-    /** Start time in HH:MM. */
     private String startTime;
-    /** End time in HH:MM. */
     private String endTime;
-    /** Classroom identifier (e.g. "A-101"). */
     private String classroom;
 
-    /**
-     * Full constructor.
-     * @param id unique identifier
-     * @param subject subject of the session
-     * @param group group attending
-     * @param dayOfWeek day of week
-     * @param startTime start time HH:MM
-     * @param endTime end time HH:MM
-     * @param classroom classroom code
-     */
     public Schedule(int id, Subject subject, MonsterHighGroup group,
                     String dayOfWeek, String startTime, String endTime, String classroom) {
         this.id = id; this.subject = subject; this.group = group;
         this.dayOfWeek = dayOfWeek; this.startTime = startTime;
         this.endTime = endTime; this.classroom = classroom;
-    }
-
-    /**
-     * Copy constructor.
-     * @param other the schedule to copy
-     */
-    public Schedule(Schedule other) {
-        this(other.id, other.subject, other.group,
-             other.dayOfWeek, other.startTime, other.endTime, other.classroom);
     }
 
     @Override public int getId()              { return id; }
