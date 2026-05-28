@@ -88,7 +88,7 @@ public class EnrollmentView {
         divider.setStyle(MonsterHighStyles.DIVIDER);
 
         Button btnDash     = dashboard.navButton("🏠  Dashboard",    false);
-        Button btnStudents = dashboard.navButton("🧟  Students",     false);
+        Button btnStudents = dashboard.navButton("🧑‍🎓  Students",     false);
         Button btnTeachers = dashboard.navButton("🧙  Teachers",     false);
         Button btnSubjects = dashboard.navButton("📚  Subjects",     false);
         Button btnEnroll   = dashboard.navButton("📋  Enrollments",  true);  // active

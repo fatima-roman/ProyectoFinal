@@ -38,6 +38,7 @@ public class MainMenu {
             CsvUtil.importTeachers();
             CsvUtil.importStudents();
             CsvUtil.importSubjects();
+            CsvUtil.importEnrollments();
         }
 
         int option;

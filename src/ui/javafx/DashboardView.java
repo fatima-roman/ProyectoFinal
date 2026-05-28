@@ -87,7 +87,7 @@ public class DashboardView {
 
         // "true" = this button is the active/selected one
         Button btnDash     = navButton("🏠  Dashboard",    true);
-        Button btnStudents = navButton("🧟  Students",     false);
+        Button btnStudents = navButton("🧑‍🎓  Students",     false);
         Button btnTeachers = navButton("🧙  Teachers",     false);
         Button btnSubjects = navButton("📚  Subjects",     false);
         Button btnEnroll   = navButton("📋  Enrollments",  false);

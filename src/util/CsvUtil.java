@@ -1,6 +1,8 @@
 package util;
 
 import model.MonsterType;
+import model.Enrollment;
+import repository.EnrollmentDAO;
 import model.Student;
 import model.Subject;
 import model.Teacher;
@@ -42,6 +44,8 @@ public class CsvUtil {
 
     /** Default CSV path for monster type data. */
     public static final String MONSTER_TYPES_PATH = "src/resources/initial/monster_types.csv";
+    
+    public static final String ENROLLMENTS_PATH = "src/resources/initial/enrollments.csv";
 
     /** Export output path for students. */
     public static final String EXPORT_STUDENTS_PATH  = "resources/export/students_export.csv";
@@ -51,6 +55,7 @@ public class CsvUtil {
 
     /** Export output path for subjects. */
     public static final String EXPORT_SUBJECTS_PATH  = "resources/export/subjects_export.csv";
+    public static final String EXPORT_ENROLLMENTS_PATH  = "resources/export/enrollment_export.csv";
 
     //DAO instances (package-private, reused by no-arg methods)
 
@@ -58,6 +63,7 @@ public class CsvUtil {
     private static final TeacherDAO     teacherDao  = new TeacherDAO();
     private static final StudentDAO     studentDao  = new StudentDAO();
     private static final SubjectDAO     subjectDao  = new SubjectDAO();
+    private static final EnrollmentDAO enrollmentDao = new EnrollmentDAO();
 
     /** Private constructor — utility class, never instantiated. */
     private CsvUtil() {}
@@ -330,6 +336,81 @@ public class CsvUtil {
             lines.forEach(pw::println);
         } catch (IOException e) {
             System.err.println("CsvUtil.exportToFile: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Imports {@link Enrollment} records from the default CSV path.
+     * Relies on STUDENT and SUBJECT tables being populated beforehand.
+     */
+    public static void importEnrollments() {
+        importEnrollments(ENROLLMENTS_PATH, enrollmentDao, studentDao, subjectDao);
+    }
+
+    /**
+     * Exports all {@link Enrollment} records to the default export path.
+     */
+    public static void exportEnrollments() {
+        List<Enrollment> list = enrollmentDao.findAll();
+        exportToFile(EXPORT_ENROLLMENTS_PATH,
+                "id,studentId,subjectId,grade1,grade2,finalGrade",
+                list.stream().map(Enrollment::toCsv).toList());
+    }
+
+    /**
+     * Updates the initial enrollments CSV file with the current database state.
+     * Overwrites {@code src/resources/initial/enrollments.csv}.
+     */
+    public static void updateEnrollments() {
+        List<Enrollment> list = enrollmentDao.findAll();
+        exportToFile(ENROLLMENTS_PATH,
+                "studentId,subjectId,grade1,grade2",
+                list.stream()
+                    .map(e -> String.format("%d,%d,%.1f,%.1f",
+                            e.getStudent().getId(),
+                            e.getSubject().getId(),
+                            e.getGrade1(),
+                            e.getGrade2()))
+                    .toList());
+    }
+
+    /**
+     * Imports {@link Enrollment} records from the specified CSV file.
+     * Expected CSV format (with header): {@code studentId,subjectId,grade1,grade2}
+     * <p>Skips any row where the student-subject pair already exists in the database.</p>
+     *
+     * @param path          path to the source CSV file
+     * @param dao           {@link EnrollmentDAO} used to persist each record
+     * @param stdDao        {@link StudentDAO} used to resolve the student foreign key
+     * @param subjDao       {@link SubjectDAO} used to resolve the subject foreign key
+     */
+    public static void importEnrollments(String path, EnrollmentDAO dao,
+                                         StudentDAO stdDao, SubjectDAO subjDao) {
+        try (BufferedReader br = new BufferedReader(new FileReader(path))) {
+            br.readLine(); // skip header
+            String line;
+            int count = 0;
+            while ((line = br.readLine()) != null) {
+                if (line.isBlank()) continue;
+                String[] p = line.split(",", -1);
+                int studentId = Integer.parseInt(p[0].trim());
+                int subjectId = Integer.parseInt(p[1].trim());
+                double grade1 = Double.parseDouble(p[2].trim());
+                double grade2 = Double.parseDouble(p[3].trim());
+
+                // Skip duplicates (respects UNIQUE constraint)
+                if (dao.existsByStudentAndSubject(studentId, subjectId)) continue;
+
+                Student  s = stdDao.findById(studentId);
+                Subject  su = subjDao.findById(subjectId);
+                if (s == null || su == null) continue; // FK no encontrada, saltar fila
+
+                dao.save(new Enrollment(0, s, su, grade1, grade2));
+                count++;
+            }
+            System.out.println("Enrollments imported: " + count + " records from " + path);
+        } catch (IOException e) {
+            System.err.println("CsvUtil.importEnrollments: " + e.getMessage());
         }
     }
 }

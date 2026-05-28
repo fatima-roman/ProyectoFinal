@@ -118,7 +118,7 @@ public class TeacherView {
 
         // "Teachers" is the active section
         Button btnDash     = dashboard.navButton("🏠  Dashboard",   false);
-        Button btnStudents = dashboard.navButton("🧟  Students",    false);
+        Button btnStudents = dashboard.navButton("🧑‍🎓  Students",    false);
         Button btnTeachers = dashboard.navButton("🧙  Teachers",    true);
         Button btnSubjects = dashboard.navButton("📚  Subjects",    false);
         Button btnEnroll   = dashboard.navButton("📋  Enrollments", false);
