@@ -154,7 +154,7 @@ public class CsvUtil {
                 dao.save(mt);
                 count++;
             }
-            System.out.println("MonsterTypes imported: " + count + " records from " + path);
+            //System.out.println("MonsterTypes imported: " + count + " records from " + path);
         } catch (IOException e) {
             System.err.println("CsvUtil.importMonsterTypes: " + e.getMessage());
         }
@@ -187,7 +187,7 @@ public class CsvUtil {
                 dao.save(t);
                 count++;
             }
-            System.out.println("Teachers imported: " + count + " records from " + path);
+            //System.out.println("Teachers imported: " + count + " records from " + path);
         } catch (IOException e) {
             System.err.println("CsvUtil.importTeachers: " + e.getMessage());
         }
@@ -225,7 +225,7 @@ public class CsvUtil {
                 dao.save(s);
                 count++;
             }
-            System.out.println("Students imported: " + count + " records from " + path);
+            //System.out.println("Students imported: " + count + " records from " + path);
         } catch (IOException e) {
             System.err.println("CsvUtil.importStudents: " + e.getMessage());
         }
@@ -259,7 +259,7 @@ public class CsvUtil {
                 dao.save(s);
                 count++;
             }
-            System.out.println("Subjects imported: " + count + " records from " + path);
+            //System.out.println("Subjects imported: " + count + " records from " + path);
         } catch (IOException e) {
             System.err.println("CsvUtil.importSubjects: " + e.getMessage());
         }
@@ -398,7 +398,6 @@ public class CsvUtil {
                 double grade1 = Double.parseDouble(p[2].trim());
                 double grade2 = Double.parseDouble(p[3].trim());
 
-                // Skip duplicates (respects UNIQUE constraint)
                 if (dao.existsByStudentAndSubject(studentId, subjectId)) continue;
 
                 Student  s = stdDao.findById(studentId);
@@ -408,7 +407,7 @@ public class CsvUtil {
                 dao.save(new Enrollment(0, s, su, grade1, grade2));
                 count++;
             }
-            System.out.println("Enrollments imported: " + count + " records from " + path);
+            //System.out.println("Enrollments imported: " + count + " records from " + path);
         } catch (IOException e) {
             System.err.println("CsvUtil.importEnrollments: " + e.getMessage());
         }
