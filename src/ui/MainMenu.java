@@ -54,8 +54,14 @@ public class MainMenu {
                 case 6 -> MainMenuReports.start();
                 case 7 -> MainMenuMonsterType.start();
                 case 8 -> MainMenuImportExport.start();
-                case 9 -> javafx.application.Application.launch(
-                        ui.javafx.MonsterHighApp.class);
+                case 9 ->{ try {
+                	javafx.application.Application.launch(
+                            ui.javafx.MonsterHighApp.class);
+				}catch(IllegalStateException e) {
+					System.out.println("The application can only be used once.");
+				}catch (Exception e) {
+					System.err.println(e);
+				}}
                 case 0 -> {
                     System.out.println("\nSaving data to CSV...");
                     CsvUtil.updateStudents();

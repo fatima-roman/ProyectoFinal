@@ -73,11 +73,14 @@ public class MonsterHighGroup implements Identifiable, Exportable {
      */
     @Override
     public String toString() {
-        String tName = (tutor != null) ? tutor.getSurname() : "none";
-        return "MonsterHighGroup[id=" + id + ", name=" + name +
-               ", students=" + students.size() + ", tutor=" + tName + "]";
+        String tName = (tutor != null) ? tutor.getName() + " " + tutor.getSurname() : "N/A";
+        return  "\n" +
+                " ID:          " + id + "\n" +
+                " Name:        " + name + "\n" +
+                " Students:    " + students.size() + "\n" +
+                " Tutor:       " + tName + "\n" +
+                "─────────────────────────────────────";
     }
-
     /**
      * Two groups are equal if they share the same {@code id}.
      *

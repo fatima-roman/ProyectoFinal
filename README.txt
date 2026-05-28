@@ -1,183 +1,126 @@
 ============================================================
-  Monster High Institute Manager — README
-  Author : Fatima Roman
-  Module : Programación — 1º DAM — IES Nervión
-  Year   : 2025–2026
+  MONSTER HIGH INSTITUTE MANAGER
+  Final Project — Programming Module, 1st DAM
+  IES Nervión · 2025-2026
+  Author: Fátima Román
 ============================================================
 
-------------------------------------------------------------
-1. REQUIREMENTS
-------------------------------------------------------------
-- Java 21 (JDK 21 LTS)
-- Eclipse IDE (2023-09 or newer recommended)
-- JavaFX SDK 21  →  https://gluonhq.com/products/javafx/
-    · Choose: JavaFX 21 LTS · SDK · Windows x64
-    · Extract to a path WITHOUT spaces, e.g.  C:\javafx-sdk-21
-- SQLite JDBC driver (already included in src/lib/)
+--- OVERVIEW ---
+
+Monster High Institute Manager is a Java desktop application
+for managing a fictional school. It handles students, teachers,
+subjects, groups, enrolments, timetables and monster types.
+
+Data is saved in CSV files and loaded into a SQLite database
+on every startup.
 
 ------------------------------------------------------------
-2. PROJECT STRUCTURE
-------------------------------------------------------------
-ProyectoFinal/
-├── src/
-│   ├── exceptions/       Custom exception classes
-│   ├── model/            Domain entities (Student, Teacher, etc.)
-│   │   └── interfaces/   Buscable, Evaluable, Exportable, Identifiable
-│   ├── repository/       DAOs — JDBC access to SQLite
-│   ├── service/          Business logic layer
-│   ├── ui/
-│   │   ├── MainMenu.java          Console entry point  ← run this
-│   │   ├── MainMenu*.java         Console sub-menus
-│   │   └── javafx/
-│   │       ├── MonsterHighApp.java  JavaFX entry point (standalone)
-│   │       ├── DashboardView.java
-│   │       ├── StudentView.java
-│   │       ├── TeacherView.java
-│   │       ├── SubjectView.java
-│   │       ├── EnrollmentView.java
-│   │       └── MonsterHighStyles.java
-│   ├── util/
-│   │   ├── DatabaseConnection.java  SQLite singleton
-│   │   └── CsvUtil.java             CSV import / export
-│   └── resources/
-│       ├── monsterhigh.db           SQLite database (auto-created)
-│       ├── schema.sql
-│       └── initial/                 Seed CSV files
-└── README.txt  ← this file
 
+--- IDE AND JAVA VERSION ---
+
+  IDE:   Eclipse IDE (2024)
+  Java:  Java 21
 
 ------------------------------------------------------------
-3. SETTING UP JAVAFX IN ECLIPSE  (do this once)
-------------------------------------------------------------
 
-STEP 1 — Add the JavaFX JARs to the Build Path
-  1. Right-click the project → Build Path → Configure Build Path…
-  2. Open the "Libraries" tab → "Classpath" node → Add External JARs…
-  3. Navigate to  C:\javafx-sdk-21\lib\
-  4. Select ALL of these JARs (Ctrl+click each):
-       javafx.base.jar
-       javafx.controls.jar
-       javafx.fxml.jar
-       javafx.graphics.jar
-       javafx.media.jar
-       javafx.swing.jar
-  5. Click "Apply and Close"
+--- EXTERNAL DEPENDENCIES ---
 
-  NOTE: If you already have old entries pointing to a different path
-  (e.g. C:\Users\Windows\Downloads\openjfx-...), remove them first
-  and re-add from the new location.
+Two libraries are required. Both are already included in the
+lib/ folder of the project.
 
-STEP 2 — Add the VM Argument to the Run Configuration
-  This step is MANDATORY — without it JavaFX crashes at runtime
-  even if the JARs are on the classpath.
+  1. JavaFX SDK (for the graphical interface)
+     Folder: lib/javafx-sdk/
 
-  1. Right-click project → Run As → Run Configurations…
-  2. Select the "MainMenu" Java Application entry
-     (or create one: Main class = ui.MainMenu)
-  3. Go to the "Arguments" tab
-  4. In the "VM arguments" box paste this line
-     (replace the path if your SDK is elsewhere):
+  2. SQLite JDBC Driver (for the database)
+     File: lib/sqlite-jdbc.jar
 
-     --module-path "C:\javafx-sdk-21\lib" --add-modules javafx.controls,javafx.fxml,javafx.graphics,javafx.base
-
-  5. Click "Apply" then "Run"
-
+No Maven or Gradle. Dependencies are managed manually.
 
 ------------------------------------------------------------
-4. HOW TO COMPILE AND RUN
-------------------------------------------------------------
 
-  OPTION A — Run from Eclipse (recommended)
-  ------------------------------------------
-  1. Complete Section 3 above.
-  2. Right-click  src/ui/MainMenu.java  → Run As → Java Application
-  3. The console menu appears. Choose option 9 to open the JavaFX GUI.
+--- HOW TO SET UP IN ECLIPSE ---
 
-  OPTION B — Run JavaFX standalone (without the console menu)
-  -----------------------------------------------------------
-  1. Right-click  src/ui/javafx/MonsterHighApp.java → Run As → Run Configurations…
-  2. Set Main class to:  ui.javafx.MonsterHighApp
-  3. Add the same VM argument from Step 2 above.
-  4. Click Run.
+1. Open Eclipse and go to:
+   File > Import > General > Existing Projects into Workspace
+   Select the project root folder and click Finish.
 
-------------------------------------------------------------
-5. DATABASE
-------------------------------------------------------------
-- Engine  : SQLite (no installation required — file-based)
-- Driver  : sqlite-jdbc-3.53.1.0.jar  (already in src/lib/)
-- Location: src/resources/monsterhigh.db
-            Created automatically on first launch.
-- Schema  : src/resources/schema.sql  (applied automatically)
-- No credentials needed.
+2. Add the libraries to the Build Path:
+   Right-click the project > Build Path > Configure Build Path
+   Go to the Libraries tab > Add JARs
+   Add: lib/sqlite-jdbc.jar
+   Add all JARs inside: lib/javafx-sdk/lib/
 
-On first run, if the database is empty, the application loads
-seed data automatically from the CSV files in src/resources/initial/.
+3. Configure the VM arguments for JavaFX:
+   Run > Run Configurations > select your Main class
+   Go to the Arguments tab > VM arguments
+   Paste this:
 
+   --module-path lib/javafx-sdk/lib --add-modules javafx.controls,javafx.fxml
+
+4. Click Run.
 
 ------------------------------------------------------------
-6. NAVIGATION IN THE JAVAFX GUI
-------------------------------------------------------------
-The GUI opens on the Dashboard, which shows summary cards for
-students, teachers, subjects and enrollments.
 
-Left sidebar buttons navigate between views:
-  🏠 Dashboard   — overview cards with live counts
-  🧟 Students    — full CRUD: add, edit, delete, search
-  🧙 Teachers    — full CRUD: add, edit, delete, search
-  📚 Subjects    — full CRUD: add, edit, delete
-  📋 Enrollments — add / delete; colour-coded grade badges
+--- DATA FILES ---
 
-IMPORTANT: option 9 in the console menu launches the JavaFX
-window. Once you close that window, you CANNOT reopen it from
-the same console session (JavaFX can only be launched once
-per JVM process). Restart the app to open the GUI again.
+The application reads and writes CSV files from the resources/ folder.
+These files are the persistent data source.
 
+  resources/students.csv
+  resources/teachers.csv
+  resources/subjects.csv
+  resources/subjects.csv
+  resources/monster_types.csv
+  resources/groups.csv
+  resources/enrollments.csv
+  resources/schedules.csv
 
-------------------------------------------------------------
-7. CSV PERSISTENCE
-------------------------------------------------------------
-On exit (console option 0 — "Exit"), the application saves
-the current state to three CSV files:
-  bin/students.csv
-  bin/subjects.csv
-  bin/teachers.csv
+On startup:   CSV files are read and loaded into SQLite.
+On exit:      All data is saved back to the CSV files.
 
-These files are human-readable and can be opened in any
-text editor or spreadsheet application.
-
+IMPORTANT: always close the application using the Exit button
+or option 0 in the console menu. If you force-close the window,
+the latest changes may not be saved to the CSV files.
 
 ------------------------------------------------------------
-8. COMMON ERRORS AND SOLUTIONS
-------------------------------------------------------------
 
-  Error: "JavaFX runtime components are missing"
-  → You forgot the VM argument. See Section 3, Step 2.
+--- DATABASE ---
 
-  Error: "ClassNotFoundException: javafx.application.Application"
-  → The JavaFX JARs are not on the classpath. See Section 3, Step 1.
+The application uses SQLite. No installation or configuration
+is needed. The database file is created automatically on the
+first run at:
 
-  Error: "IllegalStateException: Application launch must not be
-          called more than once"
-  → You opened the JavaFX window (option 9) more than once in the
-    same session. Restart the application.
+  resources/monster_high.db
 
-  Error: "No suitable driver found for jdbc:sqlite:..."
-  → The SQLite JAR is missing from the classpath.
-    In Eclipse: Build Path → Add External JARs → select
-    src/lib/sqlite-jdbc-3.53.1.0.jar
-
-  The database file is missing / tables do not exist
-  → Delete  src/resources/monsterhigh.db  and restart.
-    The app re-creates the schema automatically.
-
+The tables are recreated every time the application starts,
+based on the CSV files. You do not need to touch the .db file
+directly.
 
 ------------------------------------------------------------
-9. EXTERNAL DEPENDENCIES
+
+--- PROJECT STRUCTURE ---
+
+  src/
+  ├── model/          Domain classes (Student, Teacher, Subject...)
+  ├── repository/     DAOs and GenericRepositoryBD
+  ├── service/        Business logic layer
+  ├── ui/             JavaFX controllers and console interface
+  ├── exceptions/     Custom exceptions
+  ├── util/           DatabaseConnection (Singleton) and CsvUtil
+  └── Main.java       Entry point
+
+  lib/
+  ├── javafx-sdk/     JavaFX SDK
+  └── sqlite-jdbc.jar SQLite driver
+
+  resources/           CSV data files
+  doc/                Javadoc HTML (generated)
+
 ------------------------------------------------------------
-  Library                        Version   Location
-  ────────────────────────────── ───────── ──────────────────
-  sqlite-jdbc                    3.53.1.0  src/lib/  (bundled)
-  JavaFX SDK                     21 LTS    external — see §3
-  JUnit 5 (optional, for tests)  5.x       not included
 
+  If something does not work, check that:
+  - The VM arguments are set correctly in Run Configurations
+  - Both libraries are on the Build Path
+  - The resources/ folder exists and has the CSV files
 
+============================================================

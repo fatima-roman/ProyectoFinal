@@ -77,8 +77,11 @@ public class Teacher extends Person implements Exportable, Buscable {
      */
     @Override
     public String toString() {
-        return "Teacher[id=" + getId() + ", name=" + getName() + " " + getSurname()
-             + ", specialty=" + specialty + "]";
+        return  "\n" +
+                " ID:          " + getId() + "\n" +
+                " Name:        " + getName() + " " + getSurname() + "\n" +
+                " Specialty:   " + specialty + "\n" +
+                "─────────────────────────────────────";
     }
 
     /**

@@ -55,7 +55,11 @@ public class MonsterType implements Identifiable, Exportable {
      */
     @Override
     public String toString() {
-        return "MonsterType[id=" + id + ", name=" + name + ", terrorLevel=" + terrorLevel + "]";
+        return  "\n" +
+                " ID:          " + id + "\n" +
+                " Name:        " + name + "\n" +
+                " Terror lvl:  " + terrorLevel + "\n" +
+                "─────────────────────────────────────";
     }
 
     /**

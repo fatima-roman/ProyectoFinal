@@ -63,8 +63,13 @@ public class Subject implements Identifiable, Exportable {
      */
     @Override
     public String toString() {
-        String tName = (teacher != null) ? teacher.getName() + " " + teacher.getSurname() : "none";
-        return "Subject[id=" + id + ", name=" + name + ", course=" + course + ", teacher=" + tName + "]";
+        String tName = (teacher != null) ? teacher.getName() + " " + teacher.getSurname() : "N/A";
+        return  "\n" +
+                " ID:          " + id + "\n" +
+                " Name:        " + name + "\n" +
+                " Course:      " + course + "\n" +
+                " Teacher:     " + tName + "\n" +
+                "─────────────────────────────────────";
     }
 
     /**

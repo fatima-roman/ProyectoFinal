@@ -50,9 +50,13 @@ public class Schedule implements Identifiable, Exportable {
 
     @Override
     public String toString() {
-        return "Schedule[id="+id+", subject="+(subject!=null?subject.getName():"?")
-             +", group="+(group!=null?group.getName():"?")+", "+dayOfWeek
-             +" "+startTime+"-"+endTime+", room="+classroom+"]";
+        String sName = (subject != null) ? subject.getName() : "N/A";
+        String gName = (group != null) ? group.getName() : "N/A";
+        return  "\n" +
+                " ┌─ Schedule #" + id + "\n" +
+                " │ " + dayOfWeek + "  " + startTime + " → " + endTime + "  │  Room: " + classroom + "\n" +
+                " │ Subject  » " + sName + "\n" +
+                " └ Group    » " + gName + "\n";
     }
 
     @Override

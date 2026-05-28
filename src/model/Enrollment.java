@@ -74,8 +74,11 @@ public class Enrollment implements Identifiable, Evaluable, Exportable {
 
     @Override
     public String toString() {
-        return "Enrollment[id=" + id + ", student=" + student.getSurname() +
-               ", subject=" + subject.getName() + ", grade=" + calculateFinalGrade() + "]";
+        return  "\n" +
+                " ┌─ Enrollment #" + id + "\n" +
+                " │ Student  » " + student.getName() + " " + student.getSurname() + "\n" +
+                " │ Subject  » " + subject.getName() + "\n" +
+                " └ Grade    » " + String.format("%.2f", calculateFinalGrade()) + "\n";
     }
 
     /**
