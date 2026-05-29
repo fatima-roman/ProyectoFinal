@@ -39,6 +39,8 @@ public class MainMenu {
             CsvUtil.importStudents();
             CsvUtil.importSubjects();
             CsvUtil.importEnrollments();
+            CsvUtil.importGroups();
+            CsvUtil.importSchedules();
         }
 
         int option;
@@ -67,6 +69,9 @@ public class MainMenu {
                     CsvUtil.updateStudents();
                     CsvUtil.updateSubjects();
                     CsvUtil.updateTeachers();
+                    CsvUtil.updateEnrollments();
+                    CsvUtil.updateGroups();
+                    CsvUtil.updateSchedules();
                     System.out.println("\nSee you later! 🖤");
                 }
                 default -> System.out.println("Invalid option, please try again.");

@@ -26,15 +26,14 @@ public class MonsterHighGroupDAO extends GenericRepositoryBD<MonsterHighGroup> {
      */
     @Override
     public void save(MonsterHighGroup g) {
-        String sql = "INSERT INTO MONSTER_GROUP(id, name, tutorId) VALUES(?, ?, ?)";
-        try (Connection c = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, g.getId());
-            ps.setString(2, g.getName());
-            if (g.getTutor() != null) ps.setInt(3, g.getTutor().getId());
-            else ps.setNull(3, Types.INTEGER);
-            ps.executeUpdate();
-        } catch (SQLException e) {
+    	String sql = "INSERT INTO MONSTER_GROUP(name, tutorId) VALUES(?, ?)";
+    	try (Connection c = DatabaseConnection.getInstance().getConnection();
+    		     PreparedStatement ps = c.prepareStatement(sql)) {
+    		    ps.setString(1, g.getName());
+    		    if (g.getTutor() != null) ps.setInt(2, g.getTutor().getId());
+    		    else ps.setNull(2, Types.INTEGER);
+    		    ps.executeUpdate();
+    		} catch (SQLException e) {
             System.err.println("[MonsterHighGroupDAO.save] " + e.getMessage());
         }
     }
