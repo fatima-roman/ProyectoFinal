@@ -104,13 +104,27 @@ public class MonsterHighGroupDAO extends GenericRepositoryBD<MonsterHighGroup> {
     @Override
     public List<MonsterHighGroup> findAll() {
         List<MonsterHighGroup> list = new ArrayList<>();
-        String sql = "SELECT * FROM MONSTER_GROUP";
+        String sql = "SELECT id, name, tutorId FROM MONSTER_GROUP";
+        List<int[]> rows = new ArrayList<>();
+        List<String> names = new ArrayList<>();
         try (Connection c = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(mapRow(rs));
+            while (rs.next()) {
+                rows.add(new int[]{ rs.getInt("id"), rs.getInt("tutorId"),
+                                    rs.wasNull() ? 1 : 0 });
+                names.add(rs.getString("name"));
+            }
         } catch (SQLException e) {
             System.err.println("[MonsterHighGroupDAO.findAll] " + e.getMessage());
+            return list;
+        }
+        for (int i = 0; i < rows.size(); i++) {
+            int     id      = rows.get(i)[0];
+            int     tutorId = rows.get(i)[1];
+            boolean noTutor = rows.get(i)[2] == 1;
+            Teacher tutor   = noTutor ? null : teacherDAO.findById(tutorId);
+            list.add(new MonsterHighGroup(id, names.get(i), tutor));
         }
         return list;
     }
@@ -124,12 +138,11 @@ public class MonsterHighGroupDAO extends GenericRepositoryBD<MonsterHighGroup> {
      * @throws SQLException if any column cannot be read
      */
     private MonsterHighGroup mapRow(ResultSet rs) throws SQLException {
-        int tutorId = rs.getInt("tutorId");
-        Teacher tutor = rs.wasNull() ? null : teacherDAO.findById(tutorId);
-        return new MonsterHighGroup(
-            rs.getInt("id"),
-            rs.getString("name"),
-            tutor
-        );
+        int    id      = rs.getInt("id");
+        String name    = rs.getString("name");
+        int    tutorId = rs.getInt("tutorId");
+        boolean noTutor = rs.wasNull();
+        Teacher tutor   = noTutor ? null : teacherDAO.findById(tutorId);
+        return new MonsterHighGroup(id, name, tutor);
     }
 }

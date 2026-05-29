@@ -53,6 +53,7 @@ public class MainMenuStudent {
                 case 0 -> System.out.println("\nReturning to the main menu...");
                 default -> System.out.println("Invalid option, please try again.");
             }
+            MainMenu.savingData();
         } while (option != 0);
     }
 

@@ -118,16 +118,7 @@ public class ScheduleDAO extends GenericRepositoryBD<Schedule> {
      */
     @Override
     public List<Schedule> findAll() {
-        List<Schedule> list = new ArrayList<>();
-        String sql = "SELECT * FROM SCHEDULE";
-        try (Connection c = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) list.add(mapRow(rs));
-        } catch (SQLException e) {
-            System.err.println("[ScheduleDAO.findAll] " + e.getMessage());
-        }
-        return list;
+        return querySchedules("SELECT * FROM SCHEDULE", -1, -1);
     }
 
     /**
@@ -137,18 +128,7 @@ public class ScheduleDAO extends GenericRepositoryBD<Schedule> {
      * @return list of schedule entries for that group
      */
     public List<Schedule> findByGroup(int groupId) {
-        List<Schedule> list = new ArrayList<>();
-        String sql = "SELECT * FROM SCHEDULE WHERE groupId=?";
-        try (Connection c = DatabaseConnection.getInstance().getConnection();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, groupId);
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapRow(rs));
-            }
-        } catch (SQLException e) {
-            System.err.println("[ScheduleDAO.findByGroup] " + e.getMessage());
-        }
-        return list;
+        return querySchedules("SELECT * FROM SCHEDULE WHERE groupId=?", groupId, -1);
     }
 
     /**
@@ -158,20 +138,79 @@ public class ScheduleDAO extends GenericRepositoryBD<Schedule> {
      * @return list of schedule entries for that subject
      */
     public List<Schedule> findBySubject(int subjectId) {
+        return querySchedules("SELECT * FROM SCHEDULE WHERE subjectId=?", -1, subjectId);
+    }
+
+    /**
+     * Internal helper that executes a parameterised SCHEDULE query and maps
+     * the results to {@link Schedule} objects in two separate phases to avoid
+     * the "stmt pointer is closed" error that occurs when a nested DAO call
+     * (to resolve a foreign key) opens a new query while the outer
+     * {@link ResultSet} is still open on the same SQLite connection.
+     *
+     * <p><b>Phase 1</b> — reads all raw column values into an intermediate
+     * {@code Row} record list while the {@link ResultSet} is open, then closes
+     * the statement and connection via try-with-resources.</p>
+     *
+     * <p><b>Phase 2</b> — once the {@link ResultSet} is fully closed, resolves
+     * the {@code subjectId} and {@code groupId} foreign keys through
+     * {@link SubjectDAO} and {@link MonsterHighGroupDAO} respectively, and
+     * builds the final {@link Schedule} objects.</p>
+     *
+     * <p>Rows whose subject or group cannot be resolved (orphaned FK) are
+     * silently skipped.</p>
+     *
+     * <p>Exactly one of {@code groupId} or {@code subjectId} should be a valid
+     * positive ID; pass {@code -1} for the parameter that does not apply.
+     * If both are {@code -1} the SQL must not contain any {@code ?} placeholder
+     * (e.g. {@code SELECT * FROM SCHEDULE}).</p>
+     *
+     * @param sql        the parameterised SQL query to execute
+     * @param groupId    the group ID to bind to the first {@code ?} placeholder,
+     *                   or {@code -1} if filtering by group is not required
+     * @param subjectId  the subject ID to bind to the first {@code ?} placeholder,
+     *                   or {@code -1} if filtering by subject is not required
+     * @return a list of fully resolved {@link Schedule} objects; never {@code null},
+     *         empty if no rows match or an error occurs
+     */
+    private List<Schedule> querySchedules(String sql, int groupId, int subjectId) {
         List<Schedule> list = new ArrayList<>();
-        String sql = "SELECT * FROM SCHEDULE WHERE subjectId=?";
+        record Row(int id, int sid, int gid, String day,
+                   String start, String end, String room) {}
+        List<Row> rows = new ArrayList<>();
+
         try (Connection c = DatabaseConnection.getInstance().getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, subjectId);
+            if (groupId   != -1) ps.setInt(1, groupId);
+            if (subjectId != -1) ps.setInt(1, subjectId);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) list.add(mapRow(rs));
+                while (rs.next()) {
+                    rows.add(new Row(
+                            rs.getInt("id"),
+                            rs.getInt("subjectId"),
+                            rs.getInt("groupId"),
+                            rs.getString("dayOfWeek"),
+                            rs.getString("startTime"),
+                            rs.getString("endTime"),
+                            rs.getString("classroom")
+                    ));
+                }
             }
         } catch (SQLException e) {
-            System.err.println("[ScheduleDAO.findBySubject] " + e.getMessage());
+            System.err.println("[ScheduleDAO.findAll] " + e.getMessage());
+            return list;
+        }
+
+        for (Row r : rows) {
+            Subject          subject = subjectDAO.findById(r.sid());
+            MonsterHighGroup group   = groupDAO.findById(r.gid());
+            if (subject == null || group == null) continue;
+            list.add(new Schedule(r.id(), subject, group,
+                                  r.day(), r.start(), r.end(), r.room()));
         }
         return list;
     }
-
+    
     /**
      * Maps a {@link ResultSet} row to a {@link Schedule} object.
      * Resolves Subject and MonsterHighGroup FKs via their respective DAOs.
@@ -181,16 +220,15 @@ public class ScheduleDAO extends GenericRepositoryBD<Schedule> {
      * @throws SQLException if any column cannot be read
      */
     private Schedule mapRow(ResultSet rs) throws SQLException {
-        Subject          subject = subjectDAO.findById(rs.getInt("subjectId"));
-        MonsterHighGroup group   = groupDAO.findById(rs.getInt("groupId"));
-        return new Schedule(
-                rs.getInt("id"),
-                subject,
-                group,
-                rs.getString("dayOfWeek"),
-                rs.getString("startTime"),
-                rs.getString("endTime"),
-                rs.getString("classroom")
-        );
+        int    id  = rs.getInt("id");
+        int    sid = rs.getInt("subjectId");
+        int    gid = rs.getInt("groupId");
+        String day   = rs.getString("dayOfWeek");
+        String start = rs.getString("startTime");
+        String end   = rs.getString("endTime");
+        String room  = rs.getString("classroom");
+        Subject          subject = subjectDAO.findById(sid);
+        MonsterHighGroup group   = groupDAO.findById(gid);
+        return new Schedule(id, subject, group, day, start, end, room);
     }
 }
