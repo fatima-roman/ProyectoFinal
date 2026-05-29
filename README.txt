@@ -70,10 +70,6 @@ These files are the persistent data source.
 On startup:   CSV files are read and loaded into SQLite.
 On exit:      All data is saved back to the CSV files.
 
-IMPORTANT: always close the application using the Exit button
-or option 0 in the console menu. If you force-close the window,
-the latest changes may not be saved to the CSV files.
-
 ------------------------------------------------------------
 
 --- DATABASE ---

@@ -66,16 +66,12 @@ public class MainMenu {
 				}}
                 case 0 -> {
                     System.out.println("\nSaving data to CSV...");
-                    CsvUtil.updateStudents();
-                    CsvUtil.updateSubjects();
-                    CsvUtil.updateTeachers();
-                    CsvUtil.updateEnrollments();
-                    CsvUtil.updateGroups();
-                    CsvUtil.updateSchedules();
+                    savingData();
                     System.out.println("\nSee you later! 🖤");
                 }
                 default -> System.out.println("Invalid option, please try again.");
             }
+            savingData();
         } while (option != 0);
         sc.close();
     }
@@ -121,4 +117,16 @@ public class MainMenu {
      * @return shared scanner instance
      */
     static Scanner getScanner() { return sc; }
+    
+    /**
+     * Function to save data in changes 
+     */
+    static void savingData() {
+        CsvUtil.updateStudents();
+        CsvUtil.updateSubjects();
+        CsvUtil.updateTeachers();
+        CsvUtil.updateEnrollments();
+        CsvUtil.updateGroups();
+        CsvUtil.updateSchedules();
+    }
 }
