@@ -20,44 +20,37 @@ on every startup.
 
   IDE:   Eclipse IDE (2024)
   Java:  Java 21
+  Build: Apache Maven
 
 ------------------------------------------------------------
 
 --- EXTERNAL DEPENDENCIES ---
 
-Two libraries are required. Both are already included in the
-lib/ folder of the project.
+Dependencies are managed automatically by Maven.
+No manual library setup is required.
 
-  1. JavaFX SDK (for the graphical interface)
-     Folder: lib/javafx-sdk/
+  1. JavaFX 21.0.2 (for the graphical interface)
+  2. SQLite JDBC 3.53.1.0 (for the database)
 
-  2. SQLite JDBC Driver (for the database)
-     File: lib/sqlite-jdbc.jar
-
-No Maven or Gradle. Dependencies are managed manually.
+Maven downloads them automatically on the first build.
+Internet connection is required on first run.
 
 ------------------------------------------------------------
 
 --- HOW TO SET UP IN ECLIPSE ---
 
 1. Open Eclipse and go to:
-   File > Import > General > Existing Projects into Workspace
+   File > Import > Maven > Existing Maven Projects
    Select the project root folder and click Finish.
 
-2. Add the libraries to the Build Path:
-   Right-click the project > Build Path > Configure Build Path
-   Go to the Libraries tab > Add JARs
-   Add: lib/sqlite-jdbc.jar
-   Add all JARs inside: lib/javafx-sdk/lib/
+2. Let Maven download the dependencies:
+   Eclipse will do this automatically after import.
+   Wait for the progress bar at the bottom to finish.
+   If it does not start, right-click the project and choose:
+   Maven > Update Project (Alt+F5) > OK
 
-3. Configure the VM arguments for JavaFX:
-   Run > Run Configurations > select your Main class
-   Go to the Arguments tab > VM arguments
-   Paste this:
-
-   --module-path lib/javafx-sdk/lib --add-modules javafx.controls,javafx.fxml
-
-4. Click Run.
+3. Click Run on MainMenu.java.
+   No VM arguments or manual library configuration needed.
 
 ------------------------------------------------------------
 
@@ -66,14 +59,13 @@ No Maven or Gradle. Dependencies are managed manually.
 The application reads and writes CSV files from the resources/ folder.
 These files are the persistent data source.
 
-  resources/students.csv
-  resources/teachers.csv
-  resources/subjects.csv
-  resources/subjects.csv
-  resources/monster_types.csv
-  resources/groups.csv
-  resources/enrollments.csv
-  resources/schedules.csv
+  src/resources/students.csv
+  src/resources/teachers.csv
+  src/resources/subjects.csv
+  src/resources/monster_types.csv
+  src/resources/groups.csv
+  src/resources/enrollments.csv
+  src/resources/schedules.csv
 
 On startup:   CSV files are read and loaded into SQLite.
 On exit:      All data is saved back to the CSV files.
@@ -90,7 +82,7 @@ The application uses SQLite. No installation or configuration
 is needed. The database file is created automatically on the
 first run at:
 
-  resources/monster_high.db
+  src/resources/monsterhigh.db
 
 The tables are recreated every time the application starts,
 based on the CSV files. You do not need to touch the .db file
@@ -101,26 +93,34 @@ directly.
 --- PROJECT STRUCTURE ---
 
   src/
-  ├── model/          Domain classes (Student, Teacher, Subject...)
-  ├── repository/     DAOs and GenericRepositoryBD
-  ├── service/        Business logic layer
-  ├── ui/             JavaFX controllers and console interface
-  ├── exceptions/     Custom exceptions
-  ├── util/           DatabaseConnection (Singleton) and CsvUtil
-  └── Main.java       Entry point
+  ├── model/            Domain classes (Student, Teacher, Subject...)
+  ├── repository/       DAOs and GenericRepositoryBD
+  ├── service/          Business logic layer
+  ├── ui/               Console interface menus
+  │   └── javafx/       JavaFX graphical interface
+  ├── exceptions/       Custom exceptions
+  ├── util/             DatabaseConnection (Singleton) and CsvUtil
+  ├── resources/        CSV data files and SQLite database
+  └── module-info.java  Java module descriptor
 
-  lib/
-  ├── javafx-sdk/     JavaFX SDK
-  └── sqlite-jdbc.jar SQLite driver
-
-  resources/           CSV data files
-  doc/                Javadoc HTML (generated)
+  pom.xml               Maven configuration (dependencies and build)
 
 ------------------------------------------------------------
 
-  If something does not work, check that:
-  - The VM arguments are set correctly in Run Configurations
-  - Both libraries are on the Build Path
-  - The resources/ folder exists and has the CSV files
+--- TROUBLESHOOTING ---
+
+  If the project does not compile:
+  - Right-click the project > Maven > Update Project (Alt+F5)
+  - Make sure you have an active internet connection on first build
+  - Check that Eclipse is using Java 21:
+    Window > Preferences > Java > Installed JREs
+
+  If the JavaFX window does not open:
+  - Use option 0 to exit and relaunch the application
+  - JavaFX can only be launched once per JVM session
+
+  If the CSV files are missing:
+  - Check that src/resources/ exists and contains the data files
+  - Do not delete the resources/ folder
 
 ============================================================
