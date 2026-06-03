@@ -285,9 +285,7 @@ public class SubjectView {
                 // Constructor: Subject(int id, String name, int course, Teacher teacher)
                 // We pass the Teacher object, NOT an int id
                 if (existing == null) {
-                    int newId = subjectService.findAll().stream()
-                        .mapToInt(Subject::getId).max().orElse(0) + 1;
-                    subjectService.save(new Subject(newId, name, year, tch));
+                	subjectService.save(new Subject(0, name, year, tch));
                 } else {
                     subjectService.update(new Subject(existing.getId(), name, year, tch));
                 }

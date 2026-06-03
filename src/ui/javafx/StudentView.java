@@ -201,7 +201,6 @@ public class StudentView {
     private TableView<Student> buildTable() {
         TableView<Student> tv = new TableView<>();
         tv.setStyle(MonsterHighStyles.TABLE);
-        tv.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tv.setPlaceholder(new Label("No students found 🕸️"));
 
         // ID column
@@ -403,9 +402,7 @@ public class StudentView {
             }
             try {
                 if (existing == null) {
-                    int newId = studentService.findAll().stream()
-                            .mapToInt(Student::getId).max().orElse(0) + 1;
-                    studentService.save(new Student(newId, name, surname, bd, email, year, group, mt));
+                    studentService.save(new Student(0, name, surname, bd, email, year, group, mt));
                 } else {
                     studentService.update(
                             new Student(existing.getId(), name, surname, bd, email, year, group, mt));

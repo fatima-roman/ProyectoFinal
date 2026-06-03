@@ -312,9 +312,7 @@ public class TeacherView {
 
             try {
                 if (existing == null) {
-                    int newId = teacherService.findAll().stream()
-                            .mapToInt(Teacher::getId).max().orElse(0) + 1;
-                    teacherService.save(new Teacher(newId, name, surname, bd, email, specialty));
+                    teacherService.save(new Teacher(0, name, surname, bd, email, specialty));
                 } else {
                     teacherService.update(
                             new Teacher(existing.getId(), name, surname, bd, email, specialty));

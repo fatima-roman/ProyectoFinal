@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import exceptions.DatabaseException;
 import model.Subject;
 import model.Teacher;
 import util.DatabaseConnection;
@@ -38,7 +39,7 @@ public class SubjectDAO extends GenericRepositoryBD<Subject> {
 
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("[SubjectDAO.save] " + e.getMessage());
+            throw new DatabaseException("[SubjectDAO.save] " + e.getMessage(), e);
         }
     }
 
@@ -65,7 +66,7 @@ public class SubjectDAO extends GenericRepositoryBD<Subject> {
             ps.setInt(4, s.getId());
             ps.executeUpdate();
         } catch (SQLException e) {
-            System.err.println("[SubjectDAO.update] " + e.getMessage());
+            throw new DatabaseException("[SubjectDAO.save] " + e.getMessage(), e);
         }
     }
 
@@ -119,7 +120,7 @@ public class SubjectDAO extends GenericRepositoryBD<Subject> {
                 }
             }
         } catch (SQLException e) {
-            System.err.println("[SubjectDAO.findById] " + e.getMessage());
+            throw new DatabaseException("[SubjectDAO.save] " + e.getMessage(), e);
         }
 
         return null;
@@ -155,7 +156,7 @@ public class SubjectDAO extends GenericRepositoryBD<Subject> {
                 list.add(mapRowWithTeacher(rs));
             }
         } catch (SQLException e) {
-            System.err.println("[SubjectDAO.findAll] " + e.getMessage());
+            throw new DatabaseException("[SubjectDAO.save] " + e.getMessage(), e);
         }
 
         return list;
