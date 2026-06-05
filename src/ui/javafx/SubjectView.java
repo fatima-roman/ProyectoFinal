@@ -335,6 +335,7 @@ public class SubjectView {
      * Must only be called after buildTable() has initialised 'data'.
      */
     private void refreshTable() {
+        if (data == null) return;
         try {
             data.setAll(subjectService.findAll());
         } catch (Exception ex) {
